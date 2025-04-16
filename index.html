@@ -1,432 +1,13 @@
-<script type="text/javascript">
-        var gk_isXlsx = false;
-        var gk_xlsxFileLookup = {};
-        var gk_fileData = {};
-        function loadFileData(filename) {
-        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
-            try {
-                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
-                var firstSheetName = workbook.SheetNames[0];
-                var worksheet = workbook.Sheets[firstSheetName];
-
-                // Convert sheet to JSON to filter blank rows
-                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
-                // Filter out blank rows (rows where all cells are empty, null, or undefined)
-                var filteredData = jsonData.filter(row =>
-                    row.some(cell => cell !== '' && cell !== null && cell !== undefined)
-                );
-
-                // Convert filtered JSON back to CSV
-                var csv = XLSX.utils.aoa_to_sheet(filteredData); // Create a new sheet from filtered array of arrays
-                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
-                return csv;
-            } catch (e) {
-                console.error(e);
-                return "";
-            }
-        }
-        return gk_fileData[filename] || "";
-        }
-        </script><!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>По следам Профессора Логарифма: Взломай загадки. Спаси гения.</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        body {
-            font-family: 'Courier New', monospace;
-            background: #1a1a1a;
-            color: #00ff00;
-            margin: 0;
-            padding: 0;
-            overflow-x: hidden;
-            position: relative;
-            background-image: url('https://i.postimg.cc/D0XS6GVy/De-Watermark-ai-1744545113419.png');
-            background-size: cover;
-            background-position: center;
-            background-repeat: no-repeat;
-            min-height: 100vh;
-        }
-        body::before {
-            content: '';
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: repeating-linear-gradient(
-                0deg,
-                rgba(0, 255, 0, 0.05),
-                rgba(0, 255, 0, 0.05) 1px,
-                transparent 1px,
-                transparent 3px
-            );
-            opacity: 0.3;
-            animation: noise-slide 5s linear infinite;
-            pointer-events: none;
-            z-index: 0;
-        }
-        @keyframes noise-slide {
-            0% { transform: translateY(-100%); }
-            100% { transform: translateY(100%); }
-        }
-        canvas.matrix {
-            position: fixed;
-            top: 0;
-            left: 0;
-            z-index: -1;
-            opacity: 0.4;
-        }
-        header {
-            background: #0d1b2a;
-            padding: 1rem;
-            box-shadow: 0 0 10px #00ff00;
-            position: relative;
-            z-index: 1;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-        }
-        .header-content {
-            display: flex;
-            align-items: center;
-            width: 100%;
-            max-width: 1000px;
-            position: relative;
-        }
-        .logo {
-            position: absolute;
-            left: 0;
-            top: 50%;
-            transform: translateY(-50%);
-            width: 80px;
-            height: 80px;
-        }
-        h1 {
-            text-shadow: 0 0 5px #00ff00;
-            margin: 0 0 1rem 100px;
-            text-align: left;
-            font-size: 1.5rem;
-        }
-        h2 {
-            text-shadow: 0 0 5px #00ff00;
-        }
-        nav {
-            margin-top: 1rem;
-        }
-        nav ul {
-            display: flex;
-            list-style: none;
-            justify-content: center;
-            margin: 0;
-            padding: 0;
-        }
-        nav ul li {
-            margin: 0 1rem;
-        }
-        nav ul li a {
-            color: #00ff00;
-            text-decoration: none;
-            padding: 0.5rem 1rem;
-            border-radius: 4px;
-            transition: all 0.3s;
-            font-weight: 500;
-            position: relative;
-        }
-        nav ul li a::after {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            left: 50%;
-            width: 0;
-            height: 2px;
-            background: #00ff00;
-            transition: all 0.3s;
-            transform: translateX(-50%);
-        }
-        nav ul li a:hover::after, nav ul li a.active::after {
-            width: 80%;
-        }
-        nav ul li a:hover, nav ul li a.active {
-            transform: translateY(-2px);
-        }
-        main {
-            max-width: 1000px;
-            margin: 2rem auto;
-            padding: 1rem;
-            position: relative;
-            z-index: 1;
-        }
-        .hero {
-            text-align: center;
-            padding: 3rem 0;
-            background: rgba(0, 0, 0, 0.5);
-            border-radius: 10px;
-            margin-bottom: 3rem;
-            box-shadow: 0 0 15px rgba(0, 255, 0, 0.5);
-        }
-        .hero p {
-            font-size: 1.2rem;
-            color: #00ff00;
-            max-width: 800px;
-            margin: 0 auto 2rem;
-            line-height: 1.6;
-        }
-        .glitch {
-            animation: glitch 2s linear infinite;
-        }
-        @keyframes glitch {
-            2%, 64% {
-                transform: translate(2px, 0) skew(0deg);
-            }
-            4%, 60% {
-                transform: translate(-2px, 0) skew(0deg);
-            }
-            62% {
-                transform: translate(0, 0) skew(5deg);
-            }
-        }
-        .quest-description {
-            display: none;
-            background-color: #2c2c2c;
-            border-radius: 12px;
-            box-shadow: 0 6px 15px rgba(0,0,0,0.1);
-            padding: 2rem;
-            margin-bottom: 2rem;
-            transition: transform 0.3s, box-shadow 0.3s;
-        }
-        .quest-description.show {
-            display: block;
-            animation: fadeInUp 1s ease-out;
-        }
-        .quest-description:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 12px 20px rgba(0,0,0,0.15);
-        }
-        .quest-description h3 {
-            font-size: 1.5rem;
-            margin-bottom: 1rem;
-            color: #00ff00;
-        }
-        .quest-description p {
-            margin-bottom: 1rem;
-            line-height: 1.7;
-        }
-        .quest-description ul {
-            margin-left: 2rem;
-            margin-bottom: 1rem;
-        }
-        .quest-description li {
-            margin-bottom: 0.5rem;
-        }
-        .start-btn-container {
-            text-align: center;
-            margin: 2rem 0;
-        }
-        .start-btn {
-            background: linear-gradient(to right, #00ff00, #3498db);
-            color: white;
-            border: none;
-            padding: 1rem 2rem;
-            border-radius: 50px;
-            cursor: pointer;
-            font-size: 1.2rem;
-            transition: all 0.3s;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-            position: relative;
-            overflow: hidden;
-        }
-        .start-btn:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 6px 16px rgba(0,0,0,0.3);
-            filter: brightness(1.2);
-        }
-        .start-btn::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
-            transition: 0.5s;
-        }
-        .start-btn:hover::before {
-            left: 100%;
-        }
-        .start-btn:active {
-            transform: translateY(0);
-        }
-        .digital-particle {
-            position: absolute;
-            color: #00ff00;
-            font-size: 1rem;
-            opacity: 0.7;
-            animation: fall 10s linear infinite;
-            pointer-events: none;
-        }
-        @keyframes fall {
-            0% { transform: translateY(-100vh); opacity: 0.7; }
-            100% { transform: translateY(100vh); opacity: 0; }
-        }
-        .terminal {
-            background: #0a1a0a;
-            border: 4px solid #00ff00;
-            border-radius: 20px;
-            padding: 1.5rem;
-            margin: 2rem auto;
-            max-width: 600px;
-            color: #00ff00;
-            font-family: 'Courier New', monospace;
-            position: relative;
-            display: flex;
-            flex-direction: column;
-            align-items: flex-start;
-            box-shadow: 0 0 20px rgba(0, 255, 0, 0.5), inset 0 0 10px rgba(0, 255, 0, 0.3);
-            background: radial-gradient(circle, rgba(0, 255, 0, 0.1) 0%, rgba(0, 0, 0, 0.8) 100%);
-        }
-        .terminal::after {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: repeating-linear-gradient(
-                0deg,
-                rgba(0, 255, 0, 0.03),
-                rgba(0, 255, 0, 0.03) 1px,
-                transparent 1px,
-                transparent 4px
-            );
-            opacity: 0.2;
-            animation: noise-slide 3s linear infinite;
-            pointer-events: none;
-        }
-        .terminal input, .terminal-output {
-            text-shadow: 0 0 5px #00ff00, 0 0 10px #00ff00;
-        }
-        .terminal::before {
-            content: '>';
-            position: absolute;
-            left: 0.5rem;
-            top: 1.2rem;
-            color: #00ff00;
-            animation: blink 1s step-end infinite;
-            text-shadow: 0 0 5px #00ff00;
-        }
-        @keyframes blink {
-            50% { opacity: 0; }
-        }
-        .terminal input {
-            background: none;
-            border: none;
-            color: #00ff00;
-            font-family: 'Courier New', monospace;
-            font-size: 1rem;
-            width: 90%;
-            margin-left: 1.5rem;
-            margin-bottom: 1rem;
-            outline: none;
-        }
-        .terminal-output {
-            margin-top: 1rem;
-            color: #00ff00;
-            white-space: pre-wrap;
-            width: 100%;
-            text-align: left;
-        }
-        .particle {
-            position: absolute;
-            width: 5px;
-            height: 5px;
-            background: #00ff00;
-            border-radius: 50%;
-            opacity: 0;
-            animation: particle 2s ease-out;
-            pointer-events: none;
-        }
-        @keyframes particle {
-            0% { opacity: 1; transform: translate(0, 0); }
-            100% { opacity: 0; transform: translate(50px, -50px); }
-        }
-        .modal {
-            display: none;
-            position: fixed;
-            z-index: 1000;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0,0,0,0.8);
-            align-items: center;
-            justify-content: center;
-        }
-        .modal-content {
-            background-color: #2c2c2c;
-            padding: 2rem;
-            border-radius: 10px;
-            box-shadow: 0 0 20px #00ff00;
-            max-width: 500px;
-            text-align: center;
-        }
-        .close-btn {
-            color: #00ff00;
-            float: right;
-            font-size: 1.5rem;
-            cursor: pointer;
-        }
-        .close-btn:hover {
-            color: #3498db;
-        }
-        @media (max-width: 768px) {
-            .header-content {
-                flex-direction: column;
-                align-items: center;
-            }
-            .logo {
-                position: static;
-                transform: none;
-                margin-bottom: 1rem;
-            }
-            h1 {
-                margin: 0;
-                text-align: center;
-                font-size: 1.2rem;
-            }
-            nav ul {
-                flex-direction: column;
-            }
-            nav ul li {
-                margin: 0.5rem 0;
-            }
-            .hero p {
-                font-size: 1rem;
-            }
-            .terminal {
-                flex-direction: column;
-                align-items: flex-start;
-            }
-            .terminal input {
-                width: 90%;
-            }
-        }
-        @keyframes fadeInUp {
-            0% { opacity: 0; transform: translateY(20px); }
-            100% { opacity: 1; transform: translateY(0); }
-        }
-        .fade-in-up {
-            animation: fadeInUp 1s ease-out;
-        }
-        .centered-text {
-            text-align: center;
-        }
-    </style>
+    <link rel="stylesheet" href="styles/styles.css">
 </head>
-<body>
+<body class="index">
     <canvas class="matrix" id="matrix"></canvas>
     <header>
         <div class="header-content">
@@ -485,6 +66,16 @@
         </div>
     </div>
 
+    <footer>
+        <div class="social-links">
+            <a href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+            <a href="#" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
+            <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+            <a href="#" aria-label="YouTube"><i class="fab fa-youtube"></i></a>
+        </div>
+        <p>© 2025 По следам Профессора Логарифма | Все права защищены</p>
+    </footer>
+
     <script>
         // Terminal handling
         function handleTerminal(event) {
@@ -536,16 +127,18 @@
         // Matrix effect
         const canvas = document.getElementById('matrix');
         const ctx = canvas.getContext('2d');
-        canvas.height = window.innerHeight;
-        canvas.width = window.innerWidth;
+
+        function resizeCanvas() {
+            canvas.height = window.innerHeight;
+            canvas.width = window.innerWidth;
+        }
+        resizeCanvas();
+        window.addEventListener('resize', resizeCanvas);
+
         const chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ';
         const fontSize = 14;
-        const columns = canvas.width / fontSize;
-        const drops = [];
-
-        for (let x = 0; x < columns; x++) {
-            drops[x] = 1;
-        }
+        let columns = Math.floor(canvas.width / fontSize);
+        let drops = Array(columns).fill(1);
 
         function draw() {
             ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
@@ -563,6 +156,12 @@
             }
         }
 
+        function updateColumns() {
+            columns = Math.floor(canvas.width / fontSize);
+            drops = Array(columns).fill(1);
+        }
+        window.addEventListener('resize', updateColumns);
+
         setInterval(draw, 33);
 
         // Digital particles
@@ -575,7 +174,6 @@
             document.body.appendChild(particle);
             setTimeout(() => particle.remove(), 10000);
         }
-
         setInterval(createDigitalParticle, 500);
 
         // Modal window

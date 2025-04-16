@@ -1,995 +1,748 @@
 <script type="text/javascript">
-        var gk_isXlsx = false;
-        var gk_xlsxFileLookup = {};
-        var gk_fileData = {};
-        function loadFileData(filename) {
-        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
-            try {
-                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
-                var firstSheetName = workbook.SheetNames[0];
-                var worksheet = workbook.Sheets[firstSheetName];
+  var gk_isXlsx = false;
+  var gk_xlsxFileLookup = {};
+  var gk_fileData = {};
+  function loadFileData(filename) {
+  if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+      try {
+          var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+          var firstSheetName = workbook.SheetNames[0];
+          var worksheet = workbook.Sheets[firstSheetName];
 
-                // Convert sheet to JSON to filter blank rows
-                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
-                // Filter out blank rows (rows where all cells are empty, null, or undefined)
-                var filteredData = jsonData.filter(row =>
-                    row.some(cell => cell !== '' && cell !== null && cell !== undefined)
-                );
+          // Convert sheet to JSON to filter blank rows
+          var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+          // Filter out blank rows (rows where all cells are empty, null, or undefined)
+          var filteredData = jsonData.filter(row =>
+              row.some(cell => cell !== '' && cell !== null && cell !== undefined)
+          );
 
-                // Convert filtered JSON back to CSV
-                var csv = XLSX.utils.aoa_to_sheet(filteredData); // Create a new sheet from filtered array of arrays
-                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
-                return csv;
-            } catch (e) {
-                console.error(e);
-                return "";
-            }
-        }
-        return gk_fileData[filename] || "";
-        }
+          // Convert filtered JSON back to CSV
+          var csv = XLSX.utils.aoa_to_sheet(filteredData); // Create a new sheet from filtered array of arrays
+          csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+          return csv;
+      } catch (e) {
+          console.error(e);
+          return "";
+      }
+  }
+  return gk_fileData[filename] || "";
+  }
 </script>
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Тайна Лаборатории Логарифма: Хакерская миссия</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <style>
-    body {
-      font-family: 'Courier New', monospace;
-      background: #1a1a1a;
-      color: #00ff00;
-      margin: 0;
-      padding: 0;
-      overflow-x: hidden;
-      position: relative;
-      font-size: 1.2rem;
-    }
-    canvas.matrix {
-      position: fixed;
-      top: 0;
-      left: 0;
-      z-index: -1;
-      opacity: 0.2;
-    }
-    header {
-      background: #0d1b2a;
-      padding: 1.5rem;
-      box-shadow: 0 0 15px #00ff00;
-      position: relative;
-      z-index: 1;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    .header-content {
-      display: flex;
-      align-items: center;
-      width: 100%;
-      max-width: 1200px;
-      position: relative;
-    }
-    .logo {
-      position: absolute;
-      left: 0;
-      top: 50%;
-      transform: translateY(-50%);
-      width: 80px;
-      height: 80px;
-    }
-    h1 {
-      font-size: 2.5rem;
-      text-shadow: 0 0 8px #00ff00;
-      margin: 0 0 0 100px;
-      text-align: left;
-    }
-    h2 {
-      font-size: 2rem;
-      text-shadow: 0 0 6px #00ff00;
-    }
-    main {
-      max-width: 1200px;
-      margin: 3rem auto;
-      padding: 1.5rem;
-      position: relative;
-      z-index: 1;
-    }
-    .scene {
-      background: #2c2c2c;
-      padding: 3rem;
-      border-radius: 15px;
-      box-shadow: 0 0 20px rgba(0, 255, 0, 0.5);
-      margin-bottom: 3rem;
-      font-size: 1.3rem;
-    }
-    .btn {
-      background: linear-gradient(45deg, #00cc00, #006600);
-      color: #fff;
-      border: none;
-      padding: 0.75rem 1.5rem;
-      border-radius: 8px;
-      cursor: pointer;
-      transition: transform 0.3s ease, box-shadow 0.3s ease;
-      margin: 0.75rem;
-      font-size: 1.2rem;
-      text-transform: uppercase;
-      font-weight: bold;
-    }
-    .btn:hover {
-      transform: scale(1.1);
-      box-shadow: 0 0 20px rgba(0, 255, 0, 0.7);
-    }
-    .btn.back-btn {
-      background: linear-gradient(45deg, #ff3333, #990000);
-      color: #fff;
-    }
-    .draggable {
-      cursor: grab;
-      position: relative;
-      z-index: 10;
-      display: inline-block;
-    }
-    .draggable:hover {
-      opacity: 0.8;
-    }
-    .draggable:active {
-      cursor: grabbing;
-    }
-    .inventory-item {
-      position: relative;
-      font-size: 60px;
-      line-height: 60px;
-      cursor: grab;
-    }
-    .dropzone {
-      width: 120px;
-      height: 120px;
-      border: 3px dashed #00ff00;
-      margin: 0.75rem;
-      display: inline-block;
-      text-align: center;
-      vertical-align: top;
-      padding-top: 40px;
-      background: rgba(0, 255, 0, 0.1);
-      font-size: 1.2rem;
-    }
-    .key-drop {
-      font-size: 1rem;
-    }
-    .search-area {
-      position: relative;
-      width: 500px;
-      height: 300px;
-      background: #333;
-      margin: 1.5rem auto;
-      overflow: hidden;
-      border: 3px solid #00ff00;
-    }
-    .search-item {
-      position: absolute;
-      width: 50px;
-      height: 50px;
-      cursor: pointer;
-      transition: transform 0.3s, opacity 0.3s;
-    }
-    .search-item:hover {
-      transform: scale(1.2);
-      opacity: 0.8;
-    }
-    .locked::after {
-      content: "🔒";
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      text-align: center;
-      line-height: 50px;
-      font-size: 40px;
-      background: rgba(0,0,0,0.7);
-    }
-    .wire-task {
-      position: relative;
-      width: 500px;
-      height: 300px;
-      margin: 1.5rem auto;
-      background: #222;
-      border: 3px solid #00ff00;
-    }
-    .wire-point {
-      width: 50px;
-      height: 50px;
-      border-radius: 50%;
-      cursor: pointer;
-      position: absolute;
-      text-align: center;
-      line-height: 50px;
-      font-weight: bold;
-      transition: box-shadow 0.3s;
-      background: #00ff00;
-      color: #000;
-      font-size: 1rem;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 5px;
-      box-sizing: border-box;
-      white-space: normal;
-      overflow: hidden;
-    }
-    .wire-point.active {
-      box-shadow: 0 0 15px #00ff00;
-    }
-    .wire-canvas {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      pointer-events: none;
-    }
-    .hidden {
-      display: none;
-    }
-    .ending {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0, 0, 0, 0.9);
-      display: none;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      color: #00ff00;
-      text-align: center;
-      animation: fadeIn 0.5s;
-      z-index: 2;
-      font-size: 1.5rem;
-    }
-    .sad-ending {
-      background: linear-gradient(to bottom, #1a1a1a, #2c3e50 50%, #0f1c2b);
-    }
-    .menu-btn {
-      margin-top: 3rem;
-      font-size: 1.5rem;
-      padding: 1rem 2rem;
-      animation: pulse 1.5s infinite;
-    }
-    @keyframes fadeIn {
-      from { opacity: 0; }
-      to { opacity: 1; }
-    }
-    @keyframes pulse {
-      0% { transform: scale(1); }
-      50% { transform: scale(1.1); }
-      100% { transform: scale(1); }
-    }
-    @media (max-width: 768px) {
-      .header-content {
-        flex-direction: column;
-        align-items: center;
-      }
-      .logo {
-        position: static;
-        transform: none;
-        margin-bottom: 1rem;
-      }
-      h1 {
-        margin: 0;
-        text-align: center;
-        font-size: 1.8rem;
-      }
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Тайна Лаборатории Логарифма: Хакерская миссия</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link rel="stylesheet" href="styles/styles.css">
 </head>
 <body>
-  <canvas class="matrix" id="matrix"></canvas>
-  <header>
-    <div class="header-content">
-      <img src="https://i.postimg.cc/q74Fdnpr/IMG-20250415-113958.png" alt="Logo" class="logo">
-      <h1>Тайна Лаборатории Логарифма: Хакерская миссия</h1>
-    </div>
-  </header>
-  <main>
-    <!-- Сцена 1: Вступление -->
-    <section class="scene" id="scene1">
-      <h2>Пропавший гений</h2>
-      <p>Профессор Логарифм, легенда математики, загадочным образом исчез. Его последний след ведёт в лабораторию "ZeroDivision". Вы — опытный хакер, призванный раскрыть правду. Перед вами запертая дверь, мигающий терминал и странные подсказки. Начните свою миссию!</p>
-      <button class="btn" onclick="startPath()">Начать проникновение</button>
-    </section>
+<canvas class="matrix" id="matrix"></canvas>
+<header>
+<div class="header-content">
+<img src="https://i.postimg.cc/q74Fdnpr/IMG-20250415-113958.png" alt="Logo" class="logo">
+<h1>Тайна Лаборатории Логарифма: Хакерская миссия</h1>
+</div>
+</header>
+<main>
+<!-- Сцена 1: Вступление -->
+<section class="scene" id="scene1">
+<h2>Пропавший гений</h2>
+<p>Профессор Логарифм, легенда математики, загадочным образом исчез. Его последний след ведёт в лабораторию "ZeroDivision". Вы — опытный хакер, призванный раскрыть правду. Перед вами запертая дверь, мигающий терминал и странные подсказки. Начните свою миссию!</p>
+<button class="btn" onclick="startPath()">Начать проникновение</button>
+</section>
 
-    <!-- Фаза 1: Поиск доступа -->
-    <section class="scene hidden" id="path1">
-      <h2>Фаза 1 – Поиск доступа</h2>
-      <p>Перед входом находятся несколько эмодзи, скрытых за замками с математическими примерами. Решите уравнения, чтобы открыть замки. Найдите ключ «🔑»!</p>
-      <div class="search-area" id="search1">
-        <div class="search-item locked" style="top: 60px; left: 120px;" data-hidden="💾" 
-             onclick="unlockItem(this, '3', '💾', 'log₂(8)')"></div>
-        <div class="search-item locked" style="top: 180px; left: 240px;" data-hidden="🔧" 
-             onclick="unlockItem(this, '5', '🔧', '√(16 + 9)')"></div>
-        <div class="search-item locked" style="top: 40px; left: 40px;" data-hidden="📱" 
-             onclick="unlockItem(this, '2', '📱', '∫₀² x dx')"></div>
-        <div class="search-item locked" style="top: 100px; left: 150px;" data-hidden="🖥️" 
-             onclick="unlockItem(this, '30', '🖥️', '5! / 4')"></div>
-        <div class="search-item locked" style="top: 180px; left: 300px;" data-hidden="🖨️" 
-             onclick="unlockItem(this, '1', '🖨️', 'sin(π/2)')"></div>
-        <div class="search-item locked" style="top: 260px; left: 120px;" data-hidden="📷" 
-             onclick="unlockItem(this, '4', '📷', '2x - 4 = 4')"></div>
-        <div class="search-item locked" style="top: 60px; left: 360px;" data-hidden="🗝️" 
-             onclick="unlockItem(this, '1', '🗝️', 'e⁰')"></div>
-        <div class="search-item locked" style="top: 240px; left: 420px;" data-hidden="🔑" 
-             onclick="unlockItem(this, '2', '🔑', 'log₃(9)')"></div>
-      </div>
-      <p id="result1" class="hidden"></p>
-      <button class="btn back-btn" onclick="goBack(1)">Назад</button>
-    </section>
+<!-- Фаза 1: Поиск доступа -->
+<section class="scene hidden" id="path1">
+<h2>Фаза 1 – Поиск доступа</h2>
+<p>Перед входом находятся несколько эмодзи, скрытых за замками с математическими примерами. Решите уравнения, чтобы открыть замки. Найдите ключ «🔑»!</p>
+<div class="search-area" id="search1">
+  <div class="search-item locked pos-1" data-hidden="💾" 
+       onclick="unlockItem(this, '3', '💾', 'log₂(8)')"></div>
+  <div class="search-item locked pos-2" data-hidden="🔧" 
+       onclick="unlockItem(this, '5', '🔧', '√(16 + 9)')"></div>
+  <div class="search-item locked pos-3" data-hidden="📱" 
+       onclick="unlockItem(this, '2', '📱', '∫₀² x dx')"></div>
+  <div class="search-item locked pos-4" data-hidden="🖥️" 
+       onclick="unlockItem(this, '30', '🖥️', '5! / 4')"></div>
+  <div class="search-item locked pos-5" data-hidden="🖨️" 
+       onclick="unlockItem(this, '1', '🖨️', 'sin(π/2)')"></div>
+  <div class="search-item locked pos-6" data-hidden="📷" 
+       onclick="unlockItem(this, '4', '📷', '2x - 4 = 4')"></div>
+  <div class="search-item locked pos-7" data-hidden="🗝️" 
+       onclick="unlockItem(this, '1', '🗝️', 'e⁰')"></div>
+  <div class="search-item locked pos-8" data-hidden="🔑" 
+       onclick="unlockItem(this, '2', '🔑', 'log₃(9)')"></div>
+</div>
+<p id="result1" class="hidden"></p>
+<button class="btn back-btn" onclick="goBack(1)">Назад</button>
+</section>
 
-    <!-- Фаза 2: Соединение проводов -->
-    <section class="scene hidden" id="path2">
-      <h2>Фаза 2 – Соединение проводов</h2>
-      <p>На панели слева — числа, справа — математические выражения. Соедините их проводами так, чтобы каждое число соответствовало результату выражения. Провода можно переподключать, пока все пары не будут правильными.</p>
-      <div class="wire-task" id="wireTask">
-        <!-- Left side (numbers) -->
-        <div class="wire-point" id="left1" style="top: 30px; left: 30px;" onclick="startWire('v1', this)">16</div>
-        <div class="wire-point" id="left2" style="top: 100px; left: 30px;" onclick="startWire('v2', this)">6</div>
-        <div class="wire-point" id="left3" style="top: 170px; left: 30px;" onclick="startWire('v3', this)">2</div>
-        <div class="wire-point" id="left4" style="top: 240px; left: 30px;" onclick="startWire('v4', this)">1</div>
-        <!-- Right side (equations, swapped positions) -->
-        <div class="wire-point" id="right1" style="top: 240px; left: 420px;" data-equation="Math.cos(0)" onclick="connectWire(this)">cos(0)</div>
-        <div class="wire-point" id="right2" style="top: 170px; left: 420px;" data-equation="Math.sqrt(4)" onclick="connectWire(this)">√4</div>
-        <div class="wire-point" id="right3" style="top: 100px; left: 420px;" data-equation="factorial(3)" onclick="connectWire(this)">3!</div>
-        <div class="wire-point" id="right4" style="top: 30px; left: 420px;" data-equation="Math.pow(2, 4)" onclick="connectWire(this)">2⁴</div>
-        <canvas class="wire-canvas" id="wireCanvas"></canvas>
-      </div>
-      <p id="result2" class="hidden"></p>
-      <button class="btn back-btn" onclick="goBack(2)">Назад</button>
-    </section>
+<!-- Фаза 2: Соединение проводов -->
+<section class="scene hidden" id="path2">
+<h2>Фаза 2 – Соединение проводов</h2>
+<p>На панели слева — числа, справа — математические выражения. Соедините их проводами так, чтобы каждое число соответствовало результату выражения. Провода можно переподключать, пока все пары не будут правильными.</p>
+<div class="wire-task" id="wireTask">
+  <!-- Left side (numbers) -->
+  <div class="wire-point pos-left1" id="left1" onclick="startWire('v1', this)">16</div>
+  <div class="wire-point pos-left2" id="left2" onclick="startWire('v2', this)">6</div>
+  <div class="wire-point pos-left3" id="left3" onclick="startWire('v3', this)">2</div>
+  <div class="wire-point pos-left4" id="left4" onclick="startWire('v4', this)">1</div>
+  <!-- Right side (equations, swapped positions) -->
+  <div class="wire-point pos-right1" id="right1" data-equation="Math.cos(0)" onclick="connectWire(this)">cos(0)</div>
+  <div class="wire-point pos-right2" id="right2" data-equation="Math.sqrt(4)" onclick="connectWire(this)">√4</div>
+  <div class="wire-point pos-right3" id="right3" data-equation="factorial(3)" onclick="connectWire(this)">3!</div>
+  <div class="wire-point pos-right4" id="right4" data-equation="Math.pow(2, 4)" onclick="connectWire(this)">2⁴</div>
+  <canvas class="wire-canvas" id="wireCanvas"></canvas>
+</div>
+<p id="result2" class="hidden"></p>
+<button class="btn back-btn" onclick="goBack(2)">Назад</button>
+</section>
 
-    <!-- Фаза 3: Усложнённый ребус -->
-    <section class="scene hidden" id="path3">
-      <h2>Фаза 3 – Ребус</h2>
-      <p>Ребус:<br>
-         1. Первая буква слова «секрет»;<br>
-         2. Корень слова «крыша» (первые три буквы);<br>
-         3. Окончание слова «безопасность» (последние четыре буквы).<br>
-         Между 2-й и 3-й частями вставьте буквы «ТН».<br>
-         Какой получится результат?</p>
-      <button class="btn" onclick="solveRebus()">Решить ребус</button>
-      <p id="result3" class="hidden"></p>
-      <button class="btn back-btn" onclick="goBack(3)">Назад</button>
-    </section>
+<!-- Фаза 3: Усложнённый ребус -->
+<section class="scene hidden" id="path3">
+<h2>Фаза 3 – Ребус</h2>
+<p>Ребус:<br>
+   1. Первая буква слова «секрет»;<br>
+   2. Корень слова «крыша» (первые три буквы);<br>
+   3. Окончание слова «безопасность» (последние четыре буквы).<br>
+   Между 2-й и 3-й частями вставьте буквы «ТН».<br>
+   Какой получится результат?</p>
+<button class="btn" onclick="solveRebus()">Решить ребус</button>
+<p id="result3" class="hidden"></p>
+<button class="btn back-btn" onclick="goBack(3)">Назад</button>
+</section>
 
-    <!-- Фаза 4: Шифр -->
-    <section class="scene hidden" id="path4">
-      <h2>Фаза 4 – Шифр</h2>
-      <p>Расшифруйте сообщение:<br>
-         <strong>"лпе рспхжттпсб мпдбсйхнб"</strong><br>
-         Подсказка: сдвиньте каждую букву на 1 назад.<br>
-         Ответ должен получиться: <em>код профессора логарифма</em>.
-      </p>
-      <button class="btn" onclick="solveCipher()">Решить шифр</button>
-      <p id="result4" class="hidden"></p>
-      <button class="btn back-btn" onclick="goBack(4)">Назад</button>
-    </section>
+<!-- Фаза 4: Шифр -->
+<section class="scene hidden" id="path4">
+<h2>Фаза 4 – Шифр</h2>
+<p>Расшифруйте сообщение:<br>
+   <strong>"лпе рспхжттпсб мпдбсйхнб"</strong><br>
+   Подсказка: сдвиньте каждую букву на 1 назад.<br>
+   Ответ должен получиться: <em>код профессора логарифма</em>.
+</p>
+<button class="btn" onclick="solveCipher()">Решить шифр</button>
+<p id="result4" class="hidden"></p>
+<button class="btn back-btn" onclick="goBack(4)">Назад</button>
+</section>
 
-    <!-- Фаза 5: Секретный терминал -->
-    <section class="scene hidden" id="path5">
-      <h2>Фаза 5 – Секретный терминал</h2>
-      <p>Вы попали в секретную комнату. Терминал требует код доступа. На записке написано: "Профессор здесь". Решите, как действовать:</p>
-      <button class="btn" onclick="chooseAction(5, 'hack')">Взломать терминал</button>
-      <button class="btn" onclick="chooseAction(5, 'search')">Искать другой путь</button>
-      <p id="result5" class="hidden"></p>
-      <button class="btn back-btn" onclick="goBack(5)">Назад</button>
-    </section>
+<!-- Фаза 5: Секретный терминал -->
+<section class="scene hidden" id="path5">
+<h2>Фаза 5 – Секретный терминал</h2>
+<p>Вы попали в секретную комнату. Терминал требует код доступа. На записке написано: "Профессор здесь". Решите, как действовать:</p>
+<button class="btn" onclick="chooseAction(5, 'hack')">Взломать терминал</button>
+<button class="btn" onclick="chooseAction(5, 'search')">Искать другой путь</button>
+<p id="result5" class="hidden"></p>
+<button class="btn back-btn" onclick="goBack(5)">Назад</button>
+</section>
 
-    <!-- Фаза 6: Финальный выбор -->
-    <section class="scene hidden" id="path6">
-      <h2>Фаза 6 – Финальный выбор</h2>
-      <p id="finalText"></p>
-      <button class="btn" id="choice6a" onclick="chooseAction(6, 'save')"></button>
-      <button class="btn" id="choice6b" onclick="chooseAction(6, 'leave')"></button>
-      <p id="result6" class="hidden">Новый элемент найден под терминалом! Этот ключ (🔑) равен 25. Перетащите его в правильную скважину, чтобы открыть доступ.</p>
-      <div class="inventory-item draggable" id="keyCenter" draggable="true" ondragstart="drag(event)" style="margin: 1.5rem auto; text-align: center;">
-        🔑
-      </div>
-      <div id="keyDropzonesContainer" style="text-align: center; margin-top: 1.5rem;">
-        <div class="dropzone key-drop" data-answer="25">5×5</div>
-        <div class="dropzone key-drop" data-answer="20">10+10</div>
-        <div class="dropzone key-drop" data-answer="26">30-4</div>
-        <div class="dropzone key-drop" data-answer="16.67">50/3</div>
-      </div>
-      <p id="attemptsInfo" style="text-align: center; margin-top: 1.5rem;"></p>
-      <div id="extraChallenge" class="hidden" style="margin-top: 1.5rem;">
-        <button class="btn" id="extraChallengeBtn" onclick="showNextStep(7)">Дополнительное задание: Быстрая реакция</button>
-      </div>
-      <button class="btn back-btn" onclick="goBack(6)">Назад</button>
-    </section>
+<!-- Фаза 6: Финальный выбор -->
+<section class="scene hidden" id="path6">
+<h2>Фаза 6 – Финальный выбор</h2>
+<p id="finalText"></p>
+<button class="btn" id="choice6a" onclick="chooseAction(6, 'save')"></button>
+<button class="btn" id="choice6b" onclick="chooseAction(6, 'leave')"></button>
+<p id="result6" class="hidden">Новый элемент найден под терминалом! Этот ключ (🔑) равен 25. Перетащите его в правильную скважину, чтобы открыть доступ.</p>
+<div class="inventory-item draggable" id="keyCenter" draggable="true" ondragstart="drag(event)">
+  🔑
+</div>
+<div id="keyDropzonesContainer">
+  <div class="dropzone key-drop" data-answer="25">5×5</div>
+  <div class="dropzone key-drop" data-answer="20">10+10</div>
+  <div class="dropzone key-drop" data-answer="26">30-4</div>
+  <div class="dropzone key-drop" data-answer="16.67">50/3</div>
+</div>
+<p id="attemptsInfo"></p>
+<div id="extraChallenge" class="hidden">
+  <button class="btn" id="extraChallengeBtn" onclick="showNextStep(7)">Дополнительное задание: Быстрая реакция</button>
+</div>
+<button class="btn back-btn" onclick="goBack(6)">Назад</button>
+</section>
 
-    <!-- Фаза 7: Быстрая реакция -->
-    <section class="scene hidden" id="path7">
-      <h2>Фаза 7 – Быстрая реакция</h2>
-      <p>Перед тем как завершить миссию, система требует проверки вашей реакции! Поймайте как можно больше падающих объектов за 10 секунд!</p>
-      <canvas id="reactionGame" width="500" height="350" style="border:3px solid #00ff00; background:#222;"></canvas>
-      <p id="reactionResult" class="hidden"></p>
-      <button class="btn hidden" id="restartGameBtn" onclick="restartGame()">Начать заново</button>
-      <div style="margin-top: 1.5rem;">
-        <button class="btn" onclick="showNextStep(8)">Перейти к финальному заданию</button>
-      </div>
-      <button class="btn back-btn" onclick="goBack(7)">Назад</button>
-    </section>
+<!-- Фаза 7: Быстрая реакция -->
+<section class="scene hidden" id="path7">
+<h2>Фаза 7 – Быстрая реакция</h2>
+<p>Перед тем как завершить миссию, система требует проверки вашей реакции! Поймайте как можно больше падающих объектов за 10 секунд!</p>
+<canvas id="reactionGame" width="500" height="350" class="game-canvas"></canvas>
+<p id="reactionResult" class="hidden"></p>
+<button class="btn hidden" id="restartGameBtn" onclick="restartGame()">Начать заново</button>
+<div>
+  <button class="btn" onclick="showNextStep(8)">Перейти к финальному заданию</button>
+</div>
+<button class="btn back-btn" onclick="goBack(7)">Назад</button>
+</section>
 
-    <!-- Фаза 8: Мигалка -->
-    <section class="scene hidden" id="path8">
-      <h2>Фаза 8 – Мигалка</h2>
-      <p>Ваша миссия близка к завершению. Нажмите на мигающую точку как можно быстрее, чтобы подтвердить доступ к системе!</p>
-      <canvas id="blinkGame" width="500" height="350" style="border:3px solid #00ff00; background:#222;"></canvas>
-      <p id="blinkResult" class="hidden"></p>
-      <button class="btn hidden" id="restartBlinkBtn" onclick="restartBlinkGame()">Начать заново</button>
-      <div style="margin-top: 1.5rem;">
-        <button class="btn" onclick="showEnding(1)">Завершить игру</button>
-      </div>
-      <button class="btn back-btn" onclick="goBack(8)">Назад</button>
-    </section>
+<!-- Фаза 8: Мигалка -->
+<section class="scene hidden" id="path8">
+<h2>Фаза 8 – Мигалка</h2>
+<p>Ваша миссия близка к завершению. Нажмите на мигающую точку как можно быстрее, чтобы подтвердить доступ к системе!</p>
+<canvas id="blinkGame" width="500" height="350" class="game-canvas"></canvas>
+<p id="blinkResult" class="hidden"></p>
+<button class="btn hidden" id="restartBlinkBtn" onclick="restartBlinkGame()">Начать заново</button>
+<div>
+  <button class="btn" onclick="showEnding(1)">Завершить игру</button>
+</div>
+<button class="btn back-btn" onclick="goBack(8)">Назад</button>
+</section>
 
-    <!-- Концовки -->
-    <div class="ending" id="ending1">
-      <h2>Триумф хакера!</h2>
-      <img src="https://i.postimg.cc/HkBMfR38/file-00000000757061f8a4740df6f148b3f4-conversation-id-67f90bca-1d9c-8012-90ff-ad1c6de7e000-message-i.png" alt="Victory Scene" style="max-width: 400px; margin: 1.5rem;">
-      <p>Ваш гениальный взлом спас профессора Логарифма! Вы разрушили планы "ZeroDivision", и теперь мир науки в безопасности благодаря вам!</p>
-      <button class="btn menu-btn" onclick="window.location.href='index.html'">Вернуться в главное меню</button>
-    </div>
-    <div class="ending sad-ending" id="ending2">
-      <h2>Тяжёлый выбор...</h2>
-      <img src="https://i.postimg.cc/HLNyLMqp/file-0000000048f461f88461417d7faf5243-conversation-id-67f90bca-1d9c-8012-90ff-ad1c6de7e000-message-i.png" alt="Failure Scene" style="max-width: 400px; margin: 1.5rem;">
-      <p>Вы ушли с документами, раскрыв часть тайн "ZeroDivision". Но профессор остался в плену, и его судьба терзает вашу совесть...</p>
-      <button class="btn menu-btn" onclick="window.location.href='index.html'">Вернуться в главное меню</button>
-    </div>
-    <div class="ending sad-ending" id="ending3">
-      <h2>Путь одиночки</h2>
-      <img src="https://i.postimg.cc/HLNyLMqp/file-0000000048f461f88461417d7faf5243-conversation-id-67f90bca-1d9c-8012-90ff-ad1c6de7e000-message-i.png" alt="Failure Scene" style="max-width: 400px; margin: 1.5rem;">
-      <p>Вы предпочли собственную безопасность, оставив профессора на милость лаборатории. "ZeroDivision" продолжает свои тёмные дела, а вы скрываетесь в тенях...</p>
-      <button class="btn menu-btn" onclick="window.location.href='index.html'">Вернуться в главное меню</button>
-    </div>
-  </main>
+<!-- Концовки -->
+<div class="ending" id="ending1">
+<h2>Триумф хакера!</h2>
+<img src="https://i.postimg.cc/HkBMfR38/file-00000000757061f8a4740df6f148b3f4-conversation-id-67f90bca-1d9c-8012-90ff-ad1c6de7e000-message-i.png" alt="Victory Scene" class="ending-image">
+<p>Ваш гениальный взлом спас профессора Логарифма! Вы разрушили планы "ZeroDivision", и теперь мир науки в безопасности благодаря вам!</p>
+<button class="btn menu-btn" onclick="window.location.href='index.html'">Вернуться в главное меню</button>
+</div>
+<div class="ending sad-ending" id="ending2">
+<h2>Тяжёлый выбор...</h2>
+<img src="https://i.postimg.cc/HLNyLMqp/file-0000000048f461f88461417d7faf5243-conversation-id-67f90bca-1d9c-8012-90ff-ad1c6de7e000-message-i.png" alt="Failure Scene" class="ending-image">
+<p>Вы ушли с документами, раскрыв часть тайн "ZeroDivision". Но профессор остался в плену, и его судьба терзает вашу совесть...</p>
+<button class="btn menu-btn" onclick="window.location.href='index.html'">Вернуться в главное меню</button>
+</div>
+<div class="ending sad-ending" id="ending3">
+<h2>Путь одиночки</h2>
+<img src="https://i.postimg.cc/HLNyLMqp/file-0000000048f461f88461417d7faf5243-conversation-id-67f90bca-1d9c-8012-90ff-ad1c6de7e000-message-i.png" alt="Failure Scene" class="ending-image">
+<p>Вы предпочли собственную безопасность, оставив профессора на милость лаборатории. "ZeroDivision" продолжает свои тёмные дела, а вы скрываетесь в тенях...</p>
+<button class="btn menu-btn" onclick="window.location.href='index.html'">Вернуться в главное меню</button>
+</div>
+</main>
 
-  <!-- Канвасы для анимаций концовок -->
-  <canvas id="confettiCanvas" style="position: fixed; top: 0; left: 0; z-index: 3; pointer-events: none;"></canvas>
-  <canvas id="rainCanvas" style="position: fixed; top: 0; left: 0; z-index: 3; pointer-events: none;"></canvas>
+<!-- Канвасы для анимаций концовок -->
+<canvas id="confettiCanvas" class="effect-canvas"></canvas>
+<canvas id="rainCanvas" class="effect-canvas"></canvas>
 
-  <script>
-    let currentStep = 1;
-    let wiresConnected = {};
-    let activeConnection = null;
-    let choicesMade = {};
-    let keyAttempts = 3;
-    const wireCanvas = document.getElementById('wireCanvas');
-    const wireCtx = wireCanvas.getContext('2d');
-    wireCanvas.width = 500;
-    wireCanvas.height = 300;
+<script>
+let currentStep = 1;
+let wiresConnected = {};
+let activeConnection = null;
+let choicesMade = {};
+let keyAttempts = 3;
+const wireCanvas = document.getElementById('wireCanvas');
+const wireCtx = wireCanvas.getContext('2d');
+wireCanvas.width = 500;
+wireCanvas.height = 300;
 
-    function factorial(n) {
-      if (n === 0 || n === 1) return 1;
-      return n * factorial(n - 1);
-    }
+function factorial(n) {
+if (n === 0 || n === 1) return 1;
+return n * factorial(n - 1);
+}
 
-    function updateAttemptsInfo() {
-      document.getElementById('attemptsInfo').textContent = "Осталось попыток: " + keyAttempts;
-    }
-    updateAttemptsInfo();
+function updateAttemptsInfo() {
+document.getElementById('attemptsInfo').textContent = "Осталось попыток: " + keyAttempts;
+}
+updateAttemptsInfo();
 
-    const matrixCanvas = document.getElementById('matrix');
-    const matrixCtx = matrixCanvas.getContext('2d');
-    matrixCanvas.width = window.innerWidth;
-    matrixCanvas.height = window.innerHeight;
-    const chars = '01';
-    const fontSize = 18;
-    const columns = matrixCanvas.width / fontSize;
-    const drops = Array(Math.floor(columns)).fill(0);
+const matrixCanvas = document.getElementById('matrix');
+const matrixCtx = matrixCanvas.getContext('2d');
+matrixCanvas.width = window.innerWidth;
+matrixCanvas.height = window.innerHeight;
+const chars = '01';
+const fontSize = 18;
+const columns = matrixCanvas.width / fontSize;
+const drops = Array(Math.floor(columns)).fill(0);
 
-    function drawMatrix() {
-      matrixCtx.fillStyle = 'rgba(0, 0, 0, 0.05)';
-      matrixCtx.fillRect(0, 0, matrixCanvas.width, matrixCanvas.height);
-      matrixCtx.fillStyle = '#00ff00';
-      matrixCtx.font = fontSize + 'px monospace';
-      drops.forEach((y, i) => {
-        const text = chars[Math.floor(Math.random() * chars.length)];
-        const x = i * fontSize;
-        matrixCtx.fillText(text, x, y);
-        if (y > matrixCanvas.height && Math.random() > 0.975) drops[i] = 0;
-        drops[i] += fontSize;
-      });
-      requestAnimationFrame(drawMatrix);
-    }
-    drawMatrix();
+function drawMatrix() {
+matrixCtx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+matrixCtx.fillRect(0, 0, matrixCanvas.width, matrixCanvas.height);
+matrixCtx.fillStyle = '#00ff00';
+matrixCtx.font = fontSize + 'px monospace';
+drops.forEach((y, i) => {
+  const text = chars[Math.floor(Math.random() * chars.length)];
+  const x = i * fontSize;
+  matrixCtx.fillText(text, x, y);
+  if (y > matrixCanvas.height && Math.random() > 0.975) drops[i] = 0;
+  drops[i] += fontSize;
+});
+requestAnimationFrame(drawMatrix);
+}
+drawMatrix();
 
-    function startPath() {
-      document.getElementById('scene1').className = 'scene hidden';
-      document.getElementById('path1').className = 'scene';
-      currentStep = 1;
-    }
+function startPath() {
+document.getElementById('scene1').className = 'scene hidden';
+document.getElementById('path1').className = 'scene';
+currentStep = 1;
+}
 
-    function goBack(step) {
-      if (step === 1) {
-        document.getElementById(`path${step}`).className = 'scene hidden';
-        document.getElementById('scene1').className = 'scene';
-        currentStep = 1;
+function goBack(step) {
+if (step === 1) {
+  document.getElementById(`path${step}`).className = 'scene hidden';
+  document.getElementById('scene1').className = 'scene';
+  currentStep = 1;
+} else {
+  showNextStep(step - 1);
+}
+// Reset phase-specific data if needed
+if (step === 2) {
+  wiresConnected = {};
+  activeConnection = null;
+  wireCtx.clearRect(0, 0, wireCanvas.width, wireCanvas.height);
+}
+if (step === 6) {
+  keyAttempts = 3;
+  updateAttemptsInfo();
+  document.getElementById('keyCenter').style.display = 'block';
+}
+}
+
+function unlockItem(element, expectedAnswer, hiddenEmoji, equation) {
+let answer = prompt(`Решите уравнение:\n${equation}\n(Ответ должен быть числом):`);
+if (answer && answer.trim() === expectedAnswer) {
+  element.classList.remove("locked");
+  element.textContent = hiddenEmoji;
+  if (hiddenEmoji === "🔑") {
+    document.getElementById('result1').textContent = "Ключ найден! Что дальше?";
+    document.getElementById('result1').className = "";
+    addChoices(1);
+  }
+} else {
+  alert("Неправильный ответ! Попробуйте ещё раз.");
+}
+}
+
+function startWire(id, startPoint) {
+if (activeConnection && activeConnection.id === id) {
+  activeConnection.startPoint.classList.remove('active');
+  document.removeEventListener('mousemove', activeConnection.moveWire);
+  activeConnection = null;
+  drawWires();
+  return;
+}
+if (activeConnection) return;
+if (wiresConnected[id]) {
+  delete wiresConnected[id];
+}
+let startRect = startPoint.getBoundingClientRect();
+let canvasRect = wireCanvas.getBoundingClientRect();
+activeConnection = {
+  id: id,
+  startX: startRect.left - canvasRect.left + 25,
+  startY: startRect.top - canvasRect.top + 25,
+  startPoint: startPoint
+};
+startPoint.classList.add('active');
+activeConnection.moveWire = function(event) {
+  let endX = event.clientX - canvasRect.left;
+  let endY = event.clientY - canvasRect.top;
+  drawWires(endX, endY);
+};
+document.addEventListener('mousemove', activeConnection.moveWire);
+}
+
+function connectWire(endPoint) {
+if (!activeConnection) return;
+let endRect = endPoint.getBoundingClientRect();
+let canvasRect = wireCanvas.getBoundingClientRect();
+let endX = endRect.left - canvasRect.left + 25;
+let endY = endRect.top - canvasRect.top + 25;
+let equation = endPoint.dataset.equation;
+let computed = eval(equation);
+let startValue = activeConnection.startPoint.textContent;
+if (parseInt(startValue) === computed) {
+  wiresConnected[activeConnection.id] = {
+    startX: activeConnection.startX,
+    startY: activeConnection.startY,
+    endX: endX,
+    endY: endY
+  };
+  activeConnection.startPoint.classList.remove('active');
+  document.removeEventListener('mousemove', activeConnection.moveWire);
+  activeConnection = null;
+  checkWires();
+} else {
+  alert("Неверное соединение – результат не совпадает!");
+  activeConnection.startPoint.classList.remove('active');
+  document.removeEventListener('mousemove', activeConnection.moveWire);
+  activeConnection = null;
+}
+drawWires();
+}
+
+function drawWires(tempEndX, tempEndY) {
+wireCtx.clearRect(0, 0, wireCanvas.width, wireCanvas.height);
+for (let id in wiresConnected) {
+  let { startX, startY, endX, endY } = wiresConnected[id];
+  wireCtx.beginPath();
+  wireCtx.strokeStyle = "#00ff00";
+  wireCtx.lineWidth = 5;
+  wireCtx.shadowColor = "#00ff00";
+  wireCtx.shadowBlur = 15;
+  wireCtx.lineCap = "round";
+  wireCtx.moveTo(startX, startY);
+  wireCtx.lineTo(endX, endY);
+  wireCtx.stroke();
+  wireCtx.shadowBlur = 0;
+}
+if (activeConnection) {
+  wireCtx.beginPath();
+  wireCtx.strokeStyle = "#00ff00";
+  wireCtx.lineWidth = 3;
+  wireCtx.moveTo(activeConnection.startX, activeConnection.startY);
+  let endX = tempEndX || activeConnection.startX;
+  let endY = tempEndY || activeConnection.startY;
+  wireCtx.lineTo(endX, endY);
+  wireCtx.stroke();
+}
+}
+
+function checkWires() {
+if (Object.keys(wiresConnected).length === 4) {
+  document.getElementById('result2').textContent = "Провода соединены правильно! Что дальше?";
+  document.getElementById('result2').className = "";
+  addChoices(2);
+}
+}
+
+function solveRebus() {
+let answer = prompt("Ребус:\n1. Первая буква слова «секрет»;\n2. Корень слова «крыша» (первые три буквы);\n3. Окончание слова «безопасность» (последние четыре буквы).\n\nВставьте буквы «ТН» между 2-й и 3-й частями. Какой получится результат?");
+if (answer && answer.trim().toLowerCase() === "скрытность") {
+  document.getElementById('result3').textContent = "Ребус разгадан! Что дальше?";
+  document.getElementById('result3').className = "";
+  addChoices(3);
+} else {
+  alert("Неправильный ответ, попробуйте ещё раз.");
+}
+}
+
+function solveCipher() {
+let answer = prompt("Расшифруйте сообщение:\n\"лпе рспхжттпсб мпдбсйхнб\"\nПодсказка: сдвиньте каждую букву на 1 назад.");
+if (answer && answer.trim().toLowerCase() === "код профессора логарифма") {
+  document.getElementById('result4').textContent = "Шифр разгадан! Что дальше?";
+  document.getElementById('result4').className = "";
+  addChoices(4);
+} else {
+  alert("Неправильный ответ, попробуйте ещё раз.");
+}
+}
+
+function drag(event) {
+event.dataTransfer.setData("text", event.target.id);
+}
+
+function setupKeyDropzones() {
+document.querySelectorAll('.key-drop').forEach(dropzone => {
+  dropzone.ondragover = (event) => event.preventDefault();
+  dropzone.ondrop = function(event) {
+    event.preventDefault();
+    let itemId = event.dataTransfer.getData("text");
+    if (itemId === 'keyCenter') {
+      if (this.dataset.answer === "25") {
+        this.innerHTML = "Ключ вставлен!";
+        showEnding(choicesMade[5] === 'hack' ? (choicesMade[6] === 'save' ? 1 : 3) : 2);
       } else {
-        showNextStep(step - 1);
-      }
-      // Reset phase-specific data if needed
-      if (step === 2) {
-        wiresConnected = {};
-        activeConnection = null;
-        wireCtx.clearRect(0, 0, wireCanvas.width, wireCanvas.height);
-      }
-      if (step === 6) {
-        keyAttempts = 3;
+        keyAttempts--;
         updateAttemptsInfo();
-        document.getElementById('keyCenter').style.display = 'block';
-      }
-    }
-
-    function unlockItem(element, expectedAnswer, hiddenEmoji, equation) {
-      let answer = prompt(`Решите уравнение:\n${equation}\n(Ответ должен быть числом):`);
-      if (answer && answer.trim() === expectedAnswer) {
-        element.classList.remove("locked");
-        element.textContent = hiddenEmoji;
-        if (hiddenEmoji === "🔑") {
-          document.getElementById('result1').textContent = "Ключ найден! Что дальше?";
-          document.getElementById('result1').className = "";
-          addChoices(1);
-        }
-      } else {
-        alert("Неправильный ответ! Попробуйте ещё раз.");
-      }
-    }
-
-    function startWire(id, startPoint) {
-      if (activeConnection && activeConnection.id === id) {
-        activeConnection.startPoint.classList.remove('active');
-        document.removeEventListener('mousemove', activeConnection.moveWire);
-        activeConnection = null;
-        drawWires();
-        return;
-      }
-      if (activeConnection) return;
-      if (wiresConnected[id]) {
-        delete wiresConnected[id];
-      }
-      let startRect = startPoint.getBoundingClientRect();
-      let canvasRect = wireCanvas.getBoundingClientRect();
-      activeConnection = {
-        id: id,
-        startX: startRect.left - canvasRect.left + 25,
-        startY: startRect.top - canvasRect.top + 25,
-        startPoint: startPoint
-      };
-      startPoint.classList.add('active');
-      activeConnection.moveWire = function(event) {
-        let endX = event.clientX - canvasRect.left;
-        let endY = event.clientY - canvasRect.top;
-        drawWires(endX, endY);
-      };
-      document.addEventListener('mousemove', activeConnection.moveWire);
-    }
-
-    function connectWire(endPoint) {
-      if (!activeConnection) return;
-      let endRect = endPoint.getBoundingClientRect();
-      let canvasRect = wireCanvas.getBoundingClientRect();
-      let endX = endRect.left - canvasRect.left + 25;
-      let endY = endRect.top - canvasRect.top + 25;
-      let equation = endPoint.dataset.equation;
-      let computed = eval(equation);
-      let startValue = activeConnection.startPoint.textContent;
-      if (parseInt(startValue) === computed) {
-        wiresConnected[activeConnection.id] = {
-          startX: activeConnection.startX,
-          startY: activeConnection.startY,
-          endX: endX,
-          endY: endY
-        };
-        activeConnection.startPoint.classList.remove('active');
-        document.removeEventListener('mousemove', activeConnection.moveWire);
-        activeConnection = null;
-        checkWires();
-      } else {
-        alert("Неверное соединение – результат не совпадает!");
-        activeConnection.startPoint.classList.remove('active');
-        document.removeEventListener('mousemove', activeConnection.moveWire);
-        activeConnection = null;
-      }
-      drawWires();
-    }
-
-    function drawWires(tempEndX, tempEndY) {
-      wireCtx.clearRect(0, 0, wireCanvas.width, wireCanvas.height);
-      for (let id in wiresConnected) {
-        let { startX, startY, endX, endY } = wiresConnected[id];
-        wireCtx.beginPath();
-        wireCtx.strokeStyle = "#00ff00";
-        wireCtx.lineWidth = 5;
-        wireCtx.shadowColor = "#00ff00";
-        wireCtx.shadowBlur = 15;
-        wireCtx.lineCap = "round";
-        wireCtx.moveTo(startX, startY);
-        wireCtx.lineTo(endX, endY);
-        wireCtx.stroke();
-        wireCtx.shadowBlur = 0;
-      }
-      if (activeConnection) {
-        wireCtx.beginPath();
-        wireCtx.strokeStyle = "#00ff00";
-        wireCtx.lineWidth = 3;
-        wireCtx.moveTo(activeConnection.startX, activeConnection.startY);
-        let endX = tempEndX || activeConnection.startX;
-        let endY = tempEndY || activeConnection.startY;
-        wireCtx.lineTo(endX, endY);
-        wireCtx.stroke();
-      }
-    }
-
-    function checkWires() {
-      if (Object.keys(wiresConnected).length === 4) {
-        document.getElementById('result2').textContent = "Провода соединены правильно! Что дальше?";
-        document.getElementById('result2').className = "";
-        addChoices(2);
-      }
-    }
-
-    function solveRebus() {
-      let answer = prompt("Ребус:\n1. Первая буква слова «секрет»;\n2. Корень слова «крыша» (первые три буквы);\n3. Окончание слова «безопасность» (последние четыре буквы).\n\nВставьте буквы «ТН» между 2-й и 3-й частями. Какой получится результат?");
-      if (answer && answer.trim().toLowerCase() === "скрытность") {
-        document.getElementById('result3').textContent = "Ребус разгадан! Что дальше?";
-        document.getElementById('result3').className = "";
-        addChoices(3);
-      } else {
-        alert("Неправильный ответ, попробуйте ещё раз.");
-      }
-    }
-
-    function solveCipher() {
-      let answer = prompt("Расшифруйте сообщение:\n\"лпе рспхжттпсб мпдбсйхнб\"\nПодсказка: сдвиньте каждую букву на 1 назад.");
-      if (answer && answer.trim().toLowerCase() === "код профессора логарифма") {
-        document.getElementById('result4').textContent = "Шифр разгадан! Что дальше?";
-        document.getElementById('result4').className = "";
-        addChoices(4);
-      } else {
-        alert("Неправильный ответ, попробуйте ещё раз.");
-      }
-    }
-
-    function drag(event) {
-      event.dataTransfer.setData("text", event.target.id);
-    }
-
-    function setupKeyDropzones() {
-      document.querySelectorAll('.key-drop').forEach(dropzone => {
-        dropzone.ondragover = (event) => event.preventDefault();
-        dropzone.ondrop = function(event) {
-          event.preventDefault();
-          let itemId = event.dataTransfer.getData("text");
-          if (itemId === 'keyCenter') {
-            if (this.dataset.answer === "25") {
-              this.innerHTML = "Ключ вставлен!";
-              showEnding(choicesMade[5] === 'hack' ? (choicesMade[6] === 'save' ? 1 : 3) : 2);
-            } else {
-              keyAttempts--;
-              updateAttemptsInfo();
-              if (keyAttempts <= 0) {
-                alert("Попытки исчерпаны! Начните финальную фазу заново.");
-                keyAttempts = 3;
-                updateAttemptsInfo();
-                document.getElementById('keyCenter').style.display = 'block';
-              } else {
-                alert("Неправильная скважина! Осталось попыток: " + keyAttempts);
-              }
-            }
-          }
-        };
-      });
-    }
-
-    function addChoices(step) {
-      let result = document.getElementById(`result${step}`);
-      result.innerHTML += `
-        <br><button class="btn" onclick="chooseAction(${step}, 'continue')">Продолжить</button>
-        <button class="btn" onclick="chooseAction(${step}, 'restart')">Начать заново</button>
-      `;
-    }
-
-    function chooseAction(step, action) {
-      if (action === 'continue' && step < 5) {
-        showNextStep(step + 1);
-      } else if (action === 'restart') {
-        showNextStep(1);
-        wiresConnected = {};
-        choicesMade = {};
-        activeConnection = null;
-        wireCtx.clearRect(0, 0, wireCanvas.width, wireCanvas.height);
-      } else if (step === 5) {
-        choicesMade[5] = action;
-        document.getElementById('result5').textContent = action === 'hack' ?
-          "Терминал взломан! За стеклом виднеется силуэт профессора." :
-          "Вы обнаружили тайный выход с зашифрованными данными.";
-        document.getElementById('result5').className = "";
-        document.getElementById('finalText').textContent = action === 'hack' ?
-          "Профессор ранен, но жив. Спасти его или продолжить в одиночку?" :
-          "Документы раскрывают правду, но профессор остаётся в неизвестности. Ваш выбор?";
-        document.getElementById('choice6a').textContent = action === 'hack' ? "Спасти профессора" : "Уйти с документами";
-        document.getElementById('choice6b').textContent = action === 'hack' ? "Оставить его" : "Вернуться за профессором";
-        showNextStep(6);
-      } else if (step === 6) {
-        choicesMade[6] = action;
-        document.getElementById('result6').className = "";
-        let key = document.getElementById('keyCenter');
-        key.style.display = 'block';
-        setupKeyDropzones();
-      }
-    }
-
-    function showNextStep(step) {
-      document.getElementById(`path${currentStep}`).className = 'scene hidden';
-      currentStep = step;
-      document.getElementById(`path${currentStep}`).className = 'scene';
-      if (currentStep === 7) {
-        startGame();
-      }
-      if (currentStep === 8) {
-        startBlinkGame();
-      }
-    }
-
-    function showEnding(ending) {
-      const key = document.getElementById('keyCenter');
-      if (key) {
-        key.style.display = 'none';
-      }
-      document.querySelectorAll('.scene').forEach(scene => {
-        scene.className = 'scene hidden';
-      });
-      document.getElementById(`ending${ending}`).style.display = 'flex';
-      if (ending === 1) {
-        startConfetti();
-      } else {
-        startRain();
-      }
-    }
-
-    // Конфетти на весь экран для положительной концовки
-    const confettiCanvas = document.getElementById('confettiCanvas');
-    const confettiCtx = confettiCanvas.getContext('2d');
-    confettiCanvas.width = window.innerWidth;
-    confettiCanvas.height = window.innerHeight;
-
-    function startConfetti() {
-      let particles = [];
-
-      function createParticle() {
-        return {
-          x: Math.random() * confettiCanvas.width,
-          y: -10,
-          vx: (Math.random() - 0.5) * 6,
-          vy: Math.random() * 6 + 3,
-          size: Math.random() * 8 + 5,
-          life: 150,
-          color: `hsl(${Math.random() * 360}, 80%, 60%)`,
-          shape: Math.random() < 0.5 ? 'square' : 'circle'
-        };
-      }
-
-      function updateParticles() {
-        if (particles.length < 100 && Math.random() < 0.3) {
-          particles.push(createParticle());
-        }
-        particles = particles.filter(p => p.life > 0 && p.y < confettiCanvas.height + p.size);
-        confettiCtx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
-        particles.forEach(p => {
-          p.x += p.vx;
-          p.y += p.vy;
-          p.vx += (Math.random() - 0.5) * 0.2;
-          p.life--;
-          confettiCtx.beginPath();
-          confettiCtx.fillStyle = p.color;
-          if (p.shape === 'square') {
-            confettiCtx.fillRect(p.x - p.size / 2, p.y - p.size / 2, p.size, p.size);
-          } else {
-            confettiCtx.arc(p.x, p.y, p.size / 2, 0, Math.PI * 2);
-            confettiCtx.fill();
-          }
-        });
-        requestAnimationFrame(updateParticles);
-      }
-
-      updateParticles();
-    }
-
-    // Дождь на весь экран для отрицательных концовок
-    const rainCanvas = document.getElementById('rainCanvas');
-    const rainCtx = rainCanvas.getContext('2d');
-    rainCanvas.width = window.innerWidth;
-    rainCanvas.height = window.innerHeight;
-
-    function startRain() {
-      let drops = [];
-
-      function createDrop() {
-        return {
-          x: Math.random() * rainCanvas.width,
-          y: -10,
-          length: Math.random() * 20 + 10,
-          speed: Math.random() * 5 + 5,
-          opacity: Math.random() * 0.5 + 0.3
-        };
-      }
-
-      function updateDrops() {
-        if (drops.length < 80 && Math.random() < 0.4) {
-          drops.push(createDrop());
-        }
-        drops = drops.filter(d => d.y < rainCanvas.height + d.length);
-        rainCtx.clearRect(0, 0, rainCanvas.width, rainCanvas.height);
-        drops.forEach(d => {
-          d.y += d.speed;
-          rainCtx.beginPath();
-          rainCtx.strokeStyle = `rgba(0, 191, 255, ${d.opacity})`;
-          rainCtx.lineWidth = 2;
-          rainCtx.moveTo(d.x, d.y);
-          rainCtx.lineTo(d.x, d.y + d.length);
-          rainCtx.stroke();
-        });
-        requestAnimationFrame(updateDrops);
-      }
-
-      updateDrops();
-    }
-
-    let gameObjects = [];
-    let score = 0;
-    let gameInterval = null;
-    let gameStartTime = 0;
-    const gameCanvas = document.getElementById('reactionGame');
-    const gameCtx = gameCanvas.getContext('2d');
-
-    function startGame() {
-      score = 0;
-      gameObjects = [];
-      gameStartTime = Date.now();
-      document.getElementById('reactionResult').classList.add('hidden');
-      document.getElementById('restartGameBtn').classList.add('hidden');
-      gameCanvas.addEventListener('click', gameClick);
-      gameInterval = setInterval(updateGame, 50);
-    }
-
-    function updateGame() {
-      const elapsed = Date.now() - gameStartTime;
-      if (Math.random() < 0.1) {
-        gameObjects.push({
-          x: Math.random() * (gameCanvas.width - 20),
-          y: -20,
-          r: 18,
-          speed: 2 + Math.random() * 3
-        });
-      }
-      gameObjects.forEach(obj => {
-        obj.y += obj.speed;
-      });
-      gameObjects = gameObjects.filter(obj => obj.y - obj.r < gameCanvas.height);
-      drawGame();
-      if (elapsed > 10000) {
-        endGame();
-      }
-    }
-
-    function drawGame() {
-      gameCtx.clearRect(0, 0, gameCanvas.width, gameCanvas.height);
-      gameObjects.forEach(obj => {
-        gameCtx.beginPath();
-        gameCtx.fillStyle = "#00ff00";
-        gameCtx.arc(obj.x, obj.y, obj.r, 0, Math.PI * 2);
-        gameCtx.fill();
-      });
-      gameCtx.font = "24px Courier New";
-      gameCtx.fillStyle = "#00ff00";
-      gameCtx.fillText("Счёт: " + score, 10, 30);
-    }
-
-    function gameClick(event) {
-      const rect = gameCanvas.getBoundingClientRect();
-      const clickX = event.clientX - rect.left;
-      const clickY = event.clientY - rect.top;
-      for (let i = 0; i < gameObjects.length; i++) {
-        const obj = gameObjects[i];
-        const dist = Math.sqrt((clickX - obj.x) ** 2 + (clickY - obj.y) ** 2);
-        if (dist < obj.r) {
-          score++;
-          gameObjects.splice(i, 1);
-          break;
+        if (keyAttempts <= 0) {
+          alert("Попытки исчерпаны! Начните финальную фазу заново.");
+          keyAttempts = 3;
+          updateAttemptsInfo();
+          document.getElementById('keyCenter').style.display = 'block';
+        } else {
+          alert("Неправильная скважина! Осталось попыток: " + keyAttempts);
         }
       }
     }
+  };
+});
+}
 
-    function endGame() {
-      clearInterval(gameInterval);
-      gameCanvas.removeEventListener('click', gameClick);
-      document.getElementById('reactionResult').textContent = "Игра окончена! Ваш счёт: " + score;
-      document.getElementById('reactionResult').className = "";
-      document.getElementById('restartGameBtn').classList.remove('hidden');
+function addChoices(step) {
+let result = document.getElementById(`result${step}`);
+result.innerHTML += `
+  <br><button class="btn" onclick="chooseAction(${step}, 'continue')">Продолжить</button>
+  <button class="btn" onclick="chooseAction(${step}, 'restart')">Начать заново</button>
+`;
+}
+
+function chooseAction(step, action) {
+if (action === 'continue' && step < 5) {
+  showNextStep(step + 1);
+} else if (action === 'restart') {
+  showNextStep(1);
+  wiresConnected = {};
+  choicesMade = {};
+  activeConnection = null;
+  wireCtx.clearRect(0, 0, wireCanvas.width, wireCanvas.height);
+} else if (step === 5) {
+  choicesMade[5] = action;
+  document.getElementById('result5').textContent = action === 'hack' ?
+    "Терминал взломан! За стеклом виднеется силуэт профессора." :
+    "Вы обнаружили тайный выход с зашифрованными данными.";
+  document.getElementById('result5').className = "";
+  document.getElementById('finalText').textContent = action === 'hack' ?
+    "Профессор ранен, но жив. Спасти его или продолжить в одиночку?" :
+    "Документы раскрывают правду, но профессор остаётся в неизвестности. Ваш выбор?";
+  document.getElementById('choice6a').textContent = action === 'hack' ? "Спасти профессора" : "Уйти с документами";
+  document.getElementById('choice6b').textContent = action === 'hack' ? "Оставить его" : "Вернуться за профессора";
+  showNextStep(6);
+} else if (step === 6) {
+  choicesMade[6] = action;
+  document.getElementById('result6').className = "";
+  let key = document.getElementById('keyCenter');
+  key.style.display = 'block';
+  setupKeyDropzones();
+}
+}
+
+function showNextStep(step) {
+document.getElementById(`path${currentStep}`).className = 'scene hidden';
+currentStep = step;
+document.getElementById(`path${currentStep}`).className = 'scene';
+if (currentStep === 7) {
+  startGame();
+}
+if (currentStep === 8) {
+  startBlinkGame();
+}
+}
+
+function showEnding(ending) {
+const key = document.getElementById('keyCenter');
+if (key) {
+  key.style.display = 'none';
+}
+document.querySelectorAll('.scene').forEach(scene => {
+  scene.className = 'scene hidden';
+});
+document.getElementById(`ending${ending}`).style.display = 'flex';
+if (ending === 1) {
+  startConfetti();
+} else {
+  startRain();
+}
+}
+
+// Конфетти на весь экран для положительной концовки
+const confettiCanvas = document.getElementById('confettiCanvas');
+const confettiCtx = confettiCanvas.getContext('2d');
+confettiCanvas.width = window.innerWidth;
+confettiCanvas.height = window.innerHeight;
+
+function startConfetti() {
+let particles = [];
+
+function createParticle() {
+  return {
+    x: Math.random() * confettiCanvas.width,
+    y: -10,
+    vx: (Math.random() - 0.5) * 6,
+    vy: Math.random() * 6 + 3,
+    size: Math.random() * 8 + 5,
+    life: 150,
+    color: `hsl(${Math.random() * 360}, 80%, 60%)`,
+    shape: Math.random() < 0.5 ? 'square' : 'circle'
+  };
+}
+
+function updateParticles() {
+  if (particles.length < 100 && Math.random() < 0.3) {
+    particles.push(createParticle());
+  }
+  particles = particles.filter(p => p.life > 0 && p.y < confettiCanvas.height + p.size);
+  confettiCtx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
+  particles.forEach(p => {
+    p.x += p.vx;
+    p.y += p.vy;
+    p.vx += (Math.random() - 0.5) * 0.2;
+    p.life--;
+    confettiCtx.beginPath();
+    confettiCtx.fillStyle = p.color;
+    if (p.shape === 'square') {
+      confettiCtx.fillRect(p.x - p.size / 2, p.y - p.size / 2, p.size, p.size);
+    } else {
+      confettiCtx.arc(p.x, p.y, p.size / 2, 0, Math.PI * 2);
+      confettiCtx.fill();
     }
+  });
+  requestAnimationFrame(updateParticles);
+}
 
-    function restartGame() {
-      startGame();
-    }
+updateParticles();
+}
 
-    let blinkInterval = null;
-    let blinkScore = 0;
-    let blinkGameActive = false;
-    const blinkCanvas = document.getElementById('blinkGame');
-    const blinkCtx = blinkCanvas.getContext('2d');
-    let currentBlink = null;
+// Дождь на весь экран для отрицательных концовок
+const rainCanvas = document.getElementById('rainCanvas');
+const rainCtx = rainCanvas.getContext('2d');
+rainCanvas.width = window.innerWidth;
+rainCanvas.height = window.innerHeight;
 
-    function startBlinkGame() {
-      blinkScore = 0;
-      blinkGameActive = true;
-      document.getElementById('blinkResult').classList.add('hidden');
-      document.getElementById('restartBlinkBtn').classList.add('hidden');
-      blinkCanvas.addEventListener('click', blinkGameClick);
-      blinkInterval = setInterval(updateBlinkGame, 1000);
-      setTimeout(endBlinkGame, 10000);
-      drawBlinkGame();
-    }
+function startRain() {
+let drops = [];
 
-    function updateBlinkGame() {
-      currentBlink = {
-        x: Math.random() * (blinkCanvas.width - 40) + 20,
-        y: Math.random() * (blinkCanvas.height - 40) + 20,
-        r: 18
-      };
-      drawBlinkGame();
-    }
+function createDrop() {
+  return {
+    x: Math.random() * rainCanvas.width,
+    y: -10,
+    length: Math.random() * 20 + 10,
+    speed: Math.random() * 5 + 5,
+    opacity: Math.random() * 0.5 + 0.3
+  };
+}
 
-    function drawBlinkGame() {
-      blinkCtx.clearRect(0, 0, blinkCanvas.width, blinkCanvas.height);
-      if (currentBlink) {
-        blinkCtx.beginPath();
-        blinkCtx.fillStyle = "#00ff00";
-        blinkCtx.arc(currentBlink.x, currentBlink.y, currentBlink.r, 0, Math.PI * 2);
-        blinkCtx.fill();
-      }
-      blinkCtx.font = "24px Courier New";
-      blinkCtx.fillStyle = "#00ff00";
-      blinkCtx.fillText("Счёт: " + blinkScore, 10, 30);
-    }
+function updateDrops() {
+  if (drops.length < 80 && Math.random() < 0.4) {
+    drops.push(createDrop());
+  }
+  drops = drops.filter(d => d.y < rainCanvas.height + d.length);
+  rainCtx.clearRect(0, 0, rainCanvas.width, rainCanvas.height);
+  drops.forEach(d => {
+    d.y += d.speed;
+    rainCtx.beginPath();
+    rainCtx.strokeStyle = `rgba(0, 191, 255, ${d.opacity})`;
+    rainCtx.lineWidth = 2;
+    rainCtx.moveTo(d.x, d.y);
+    rainCtx.lineTo(d.x, d.y + d.length);
+    rainCtx.stroke();
+  });
+  requestAnimationFrame(updateDrops);
+}
 
-    function blinkGameClick(event) {
-      if (!currentBlink) return;
-      const rect = blinkCanvas.getBoundingClientRect();
-      const clickX = event.clientX - rect.left;
-      const clickY = event.clientY - rect.top;
-      const dist = Math.sqrt((clickX - currentBlink.x) ** 2 + (clickY - currentBlink.y) ** 2);
-      if (dist < currentBlink.r) {
-        blinkScore++;
-        currentBlink = null;
-        drawBlinkGame();
-      }
-    }
+updateDrops();
+}
 
-    function endBlinkGame() {
-      clearInterval(blinkInterval);
-      blinkCanvas.removeEventListener('click', blinkGameClick);
-      blinkGameActive = false;
-      document.getElementById('blinkResult').textContent = "Игра окончена! Ваш счёт: " + blinkScore;
-      document.getElementById('blinkResult').className = "";
-      document.getElementById('restartBlinkBtn').classList.remove('hidden');
-    }
+let gameObjects = [];
+let score = 0;
+let gameInterval = null;
+let gameStartTime = 0;
+const gameCanvas = document.getElementById('reactionGame');
+const gameCtx = gameCanvas.getContext('2d');
 
-    function restartBlinkGame() {
-      startBlinkGame();
-    }
-  </script>
+function startGame() {
+score = 0;
+gameObjects = [];
+gameStartTime = Date.now();
+document.getElementById('reactionResult').classList.add('hidden');
+document.getElementById('restartGameBtn').classList.add('hidden');
+gameCanvas.addEventListener('click', gameClick);
+gameInterval = setInterval(updateGame, 50);
+}
+
+function updateGame() {
+const elapsed = Date.now() - gameStartTime;
+if (Math.random() < 0.1) {
+  gameObjects.push({
+    x: Math.random() * (gameCanvas.width - 20),
+    y: -20,
+    r: 18,
+    speed: 2 + Math.random() * 3
+  });
+}
+gameObjects.forEach(obj => {
+  obj.y += obj.speed;
+});
+gameObjects = gameObjects.filter(obj => obj.y - obj.r < gameCanvas.height);
+drawGame();
+if (elapsed > 10000) {
+  endGame();
+}
+}
+
+function drawGame() {
+gameCtx.clearRect(0, 0, gameCanvas.width, gameCanvas.height);
+gameObjects.forEach(obj => {
+  gameCtx.beginPath();
+  gameCtx.fillStyle = "#00ff00";
+  gameCtx.arc(obj.x, obj.y, obj.r, 0, Math.PI * 2);
+  gameCtx.fill();
+});
+gameCtx.font = "24px Courier New";
+gameCtx.fillStyle = "#00ff00";
+gameCtx.fillText("Счёт: " + score, 10, 30);
+}
+
+function gameClick(event) {
+const rect = gameCanvas.getBoundingClientRect();
+const clickX = event.clientX - rect.left;
+const clickY = event.clientY - rect.top;
+for (let i = 0; i < gameObjects.length; i++) {
+  const obj = gameObjects[i];
+  const dist = Math.sqrt((clickX - obj.x) ** 2 + (clickY - obj.y) ** 2);
+  if (dist < obj.r) {
+    score++;
+    gameObjects.splice(i, 1);
+    break;
+  }
+}
+}
+
+function endGame() {
+clearInterval(gameInterval);
+gameCanvas.removeEventListener('click', gameClick);
+document.getElementById('reactionResult').textContent = "Игра окончена! Ваш счёт: " + score;
+document.getElementById('reactionResult').className = "";
+document.getElementById('restartGameBtn').classList.remove('hidden');
+}
+
+function restartGame() {
+startGame();
+}
+
+let blinkInterval = null;
+let blinkScore = 0;
+let blinkGameActive = false;
+const blinkCanvas = document.getElementById('blinkGame');
+const blinkCtx = blinkCanvas.getContext('2d');
+let currentBlink = null;
+
+function startBlinkGame() {
+blinkScore = 0;
+blinkGameActive = true;
+document.getElementById('blinkResult').classList.add('hidden');
+document.getElementById('restartBlinkBtn').classList.add('hidden');
+blinkCanvas.addEventListener('click', blinkGameClick);
+blinkInterval = setInterval(updateBlinkGame, 1000);
+setTimeout(endBlinkGame, 10000);
+drawBlinkGame();
+}
+
+function updateBlinkGame() {
+contemporaryBlink = {
+  x: Math.random() * (blinkCanvas.width - forty) + 20,
+  y: Math.random() * (blinkCanvas.height - 40) + 20,
+  r: 18
+};
+drawBlinkGame();
+}
+
+function drawBlinkGame() {
+blinkCtx.clearRect(zero, 0, blinkCanvas.width, blinkCanvas.height);
+if (currentBlink) {
+  blinkCtx.beginPath();
+  blinkCtx.fillStyle = "#00ff00";
+  blinkCtx.arc(currentBlink.x, currentBlink.y, currentBlink.r, 0, Math.PI * 2);
+  blinkCtx.fill();
+}
+blinkCtx.font = "24px Courier New";
+blinkCtx.fillStyle = "#00ff00";
+blinkCtx.fillText("Счёт: " + blinkScore, 10, 30);
+}
+
+function blinkGameClick(event) {
+if (!currentBlink) return;
+const rect = blinkCanvas.getBoundingClientRect();
+const clickX = event.clientX - rect.left;
+const clickY = event.clientY - rect.top;
+const dist = Math.sqrt((clickX - currentBlink.x) ** 2 + (clickY - currentBlink.y) ** 2);
+if (dist < currentBlink.r) {
+  blinkScore++;
+  currentBlink = null;
+  drawBlinkGame();
+}
+}
+
+function endBlinkGame() {
+clearInterval(blinkInterval);
+blinkCanvas.removeEventListener('click', blinkGameClick);
+blinkGameActive = false;
+document.getElementById('blinkResult').textContent = "Игра окончена! Ваш счёт: " + blinkScore;
+document.getElementById('blinkResult').className = "";
+document.getElementById('restartBlinkBtn').classList.remove('hidden');
+}
+
+function restartBlinkGame() {
+startBlinkGame();
+}
+</script>
 <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'930a4f1c0987b03f',t:'MTc0NDcwODIxOC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script><script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'930a70d04dc9adc3',t:'MTc0NDcwOTU5OC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9316d42f8c4f53b2',t:'MTc0NDgzOTQ5OC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script>
 </body>
 </html>
