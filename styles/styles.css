@@ -1046,7 +1046,7 @@ main.game {
     background: #333;
     margin: 1.5rem auto;
     overflow: hidden;
-    border: 3px solid #00ffOwned by xAI00;
+    border: 3px solid #00ff00;
 }
 
 .search-item {
@@ -1077,38 +1077,49 @@ main.game {
 
 .wire-task {
     position: relative;
-    width: 500px;
-    height: 300px;
+    width: 800px;
+    height: 600px;
     margin: 1.5rem auto;
-    background: #222;
+    background: #1a1a1a url('../images/volt.png') center/cover no-repeat;
     border: 3px solid #00ff00;
+    box-shadow: inset 0 0 20px rgba(0, 255, 0, 0.3);
+    user-select: none;
 }
 
 .wire-point {
-    width: 50px;
-    height: 50px;
+    width: 80px;
+    height: 80px;
     border-radius: 50%;
-    cursor: pointer;
-    position: absolute;
-    text-align: center;
-    line-height: 50px;
-    font-weight: bold;
-    transition: box-shadow 0.3s;
     background: #00ff00;
     color: #000;
-    font-size: 1rem;
+    position: absolute;
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 5px;
-    box-sizing: border-box;
-    white-space: normal;
-    overflow: hidden;
+    cursor: grab;
+    font-weight: bold;
+    z-index: 2;
+    user-select: none;
+    box-shadow: 0 0 10px rgba(0, 255, 0, 0.5);
+    font-size: 18px;
+    padding: 10px;
+    text-align: center;
 }
 
-.wire-point.active {
-    box-shadow: 0 0 15px #00ff00;
-}
+/* Обновленные позиции для точек */
+.pos-left1 { top: 50px; left: 50px; }
+.pos-left2 { top: 150px; left: 50px; }
+.pos-left3 { top: 250px; left: 50px; }
+.pos-left4 { top: 350px; left: 50px; }
+.pos-left5 { top: 450px; left: 50px; }
+.pos-left6 { top: 550px; left: 50px; }
+
+.pos-right1 { top: 50px; left: 670px; }
+.pos-right2 { top: 150px; left: 670px; }
+.pos-right3 { top: 250px; left: 670px; }
+.pos-right4 { top: 350px; left: 670px; }
+.pos-right5 { top: 450px; left: 670px; }
+.pos-right6 { top: 550px; left: 670px; }
 
 .wire-canvas {
     position: absolute;
@@ -1116,7 +1127,7 @@ main.game {
     left: 0;
     width: 100%;
     height: 100%;
-    pointer-events: none;
+    z-index: 1;
 }
 
 .hidden {
@@ -1179,15 +1190,6 @@ main.game {
 .pos-6 { top: 260px; left: 120px; }
 .pos-7 { top: 60px; left: 360px; }
 .pos-8 { top: 240px; left: 420px; }
-
-.pos-left1 { top: 30px; left: 30px; }
-.pos-left2 { top: 100px; left: 30px; }
-.pos-left3 { top: 170px; left: 30px; }
-.pos-left4 { top: 240px; left: 30px; }
-.pos-right1 { top: 240px; left: 420px; }
-.pos-right2 { top: 170px; left: 420px; }
-.pos-right3 { top: 100px; left: 420px; }
-.pos-right4 { top: 30px; left: 420px; }
 
 .game-canvas {
     border: 3px solid #00ff00;

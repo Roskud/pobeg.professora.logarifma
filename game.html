@@ -84,16 +84,22 @@
 <h2>Фаза 2 – Соединение проводов</h2>
 <p>На панели слева — числа, справа — математические выражения. Соедините их проводами так, чтобы каждое число соответствовало результату выражения. Провода можно переподключать, пока все пары не будут правильными.</p>
 <div class="wire-task" id="wireTask">
-  <!-- Left side (numbers) -->
-  <div class="wire-point pos-left1" id="left1" onclick="startWire('v1', this)">16</div>
-  <div class="wire-point pos-left2" id="left2" onclick="startWire('v2', this)">6</div>
-  <div class="wire-point pos-left3" id="left3" onclick="startWire('v3', this)">2</div>
-  <div class="wire-point pos-left4" id="left4" onclick="startWire('v4', this)">1</div>
-  <!-- Right side (equations, swapped positions) -->
-  <div class="wire-point pos-right1" id="right1" data-equation="Math.cos(0)" onclick="connectWire(this)">cos(0)</div>
-  <div class="wire-point pos-right2" id="right2" data-equation="Math.sqrt(4)" onclick="connectWire(this)">√4</div>
-  <div class="wire-point pos-right3" id="right3" data-equation="factorial(3)" onclick="connectWire(this)">3!</div>
-  <div class="wire-point pos-right4" id="right4" data-equation="Math.pow(2, 4)" onclick="connectWire(this)">2⁴</div>
+  <!-- Левая сторона (числа) -->
+  <div class="wire-point pos-left1" id="left1" onmousedown="startDraggingWire('v1', this, event)" onmouseup="stopDraggingWire(this)">16</div>
+  <div class="wire-point pos-left2" id="left2" onmousedown="startDraggingWire('v2', this, event)" onmouseup="stopDraggingWire(this)">6</div>
+  <div class="wire-point pos-left3" id="left3" onmousedown="startDraggingWire('v3', this, event)" onmouseup="stopDraggingWire(this)">2</div>
+  <div class="wire-point pos-left4" id="left4" onmousedown="startDraggingWire('v4', this, event)" onmouseup="stopDraggingWire(this)">1</div>
+  <div class="wire-point pos-left5" id="left5" onmousedown="startDraggingWire('v5', this, event)" onmouseup="stopDraggingWire(this)">24</div>
+  <div class="wire-point pos-left6" id="left6" onmousedown="startDraggingWire('v6', this, event)" onmouseup="stopDraggingWire(this)">8</div>
+  
+  <!-- Правая сторона (уравнения) -->
+  <div class="wire-point pos-right1" id="right1" data-equation="Math.cos(0)" onmouseup="stopDraggingWire(this)">cos(0)</div>
+  <div class="wire-point pos-right2" id="right2" data-equation="Math.sqrt(4)" onmouseup="stopDraggingWire(this)">√4</div>
+  <div class="wire-point pos-right3" id="right3" data-equation="factorial(3)" onmouseup="stopDraggingWire(this)">3!</div>
+  <div class="wire-point pos-right4" id="right4" data-equation="Math.pow(2, 4)" onmouseup="stopDraggingWire(this)">2⁴</div>
+  <div class="wire-point pos-right5" id="right5" data-equation="Math.pow(2, 3) * 3" onmouseup="stopDraggingWire(this)">2³×3</div>
+  <div class="wire-point pos-right6" id="right6" data-equation="Math.pow(2, 3)" onmouseup="stopDraggingWire(this)">2³</div>
+  
   <canvas class="wire-canvas" id="wireCanvas"></canvas>
 </div>
 <p id="result2" class="hidden"></p>
@@ -219,8 +225,8 @@ let choicesMade = {};
 let keyAttempts = 3;
 const wireCanvas = document.getElementById('wireCanvas');
 const wireCtx = wireCanvas.getContext('2d');
-wireCanvas.width = 500;
-wireCanvas.height = 300;
+wireCanvas.width = 800;
+wireCanvas.height = 600;
 
 function factorial(n) {
 if (n === 0 || n === 1) return 1;
@@ -299,97 +305,219 @@ if (answer && answer.trim() === expectedAnswer) {
 }
 }
 
-function startWire(id, startPoint) {
-if (activeConnection && activeConnection.id === id) {
-  activeConnection.startPoint.classList.remove('active');
-  document.removeEventListener('mousemove', activeConnection.moveWire);
-  activeConnection = null;
+let isDragging = false;
+let currentWire = null;
+let mouseX = 0;
+let mouseY = 0;
+let wireStartX = 0;
+let wireStartY = 0;
+
+function startDraggingWire(id, startPoint, event) {
+    event.preventDefault();
+    
+    // Проверяем, существует ли уже провод
+    if (wiresConnected[id]) {
+        const rect = wireCanvas.getBoundingClientRect();
+        const clickX = event.clientX - rect.left;
+        const clickY = event.clientY - rect.top;
+        const wire = wiresConnected[id];
+        
+        // Проверяем расстояние до обоих концов провода
+        const startDist = Math.sqrt((clickX - wire.startX) ** 2 + (clickY - wire.startY) ** 2);
+        const endDist = Math.sqrt((clickX - wire.endX) ** 2 + (clickY - wire.endY) ** 2);
+        
+        // Если клик близко к любому концу провода - отсоединяем его
+        if (startDist < 40 || endDist < 40) {
+            delete wiresConnected[id];
+            drawWires();
+            return;
+        }
+    }
+    
+    isDragging = true;
+    const rect = wireCanvas.getBoundingClientRect();
+    const startRect = startPoint.getBoundingClientRect();
+    
+    wireStartX = startRect.left - rect.left + startRect.width / 2;
+    wireStartY = startRect.top - rect.top + startRect.height / 2;
+    
+    currentWire = {
+        id: id,
+        startX: wireStartX,
+        startY: wireStartY,
+        startPoint: startPoint
+    };
+    
+    startPoint.classList.add('active');
+    
+    document.addEventListener('mousemove', handleWireDrag);
+    document.addEventListener('mouseup', handleWireRelease);
+}
+
+function handleWireDrag(event) {
+  if (!isDragging || !currentWire) return;
+  
+  event.preventDefault();
+  
+  const rect = wireCanvas.getBoundingClientRect();
+  mouseX = event.clientX - rect.left;
+  mouseY = event.clientY - rect.top;
+  
   drawWires();
-  return;
-}
-if (activeConnection) return;
-if (wiresConnected[id]) {
-  delete wiresConnected[id];
-}
-let startRect = startPoint.getBoundingClientRect();
-let canvasRect = wireCanvas.getBoundingClientRect();
-activeConnection = {
-  id: id,
-  startX: startRect.left - canvasRect.left + 25,
-  startY: startRect.top - canvasRect.top + 25,
-  startPoint: startPoint
-};
-startPoint.classList.add('active');
-activeConnection.moveWire = function(event) {
-  let endX = event.clientX - canvasRect.left;
-  let endY = event.clientY - canvasRect.top;
-  drawWires(endX, endY);
-};
-document.addEventListener('mousemove', activeConnection.moveWire);
 }
 
-function connectWire(endPoint) {
-if (!activeConnection) return;
-let endRect = endPoint.getBoundingClientRect();
-let canvasRect = wireCanvas.getBoundingClientRect();
-let endX = endRect.left - canvasRect.left + 25;
-let endY = endRect.top - canvasRect.top + 25;
-let equation = endPoint.dataset.equation;
-let computed = eval(equation);
-let startValue = activeConnection.startPoint.textContent;
-if (parseInt(startValue) === computed) {
-  wiresConnected[activeConnection.id] = {
-    startX: activeConnection.startX,
-    startY: activeConnection.startY,
-    endX: endX,
-    endY: endY
-  };
-  activeConnection.startPoint.classList.remove('active');
-  document.removeEventListener('mousemove', activeConnection.moveWire);
-  activeConnection = null;
-  checkWires();
-} else {
-  alert("Неверное соединение – результат не совпадает!");
-  activeConnection.startPoint.classList.remove('active');
-  document.removeEventListener('mousemove', activeConnection.moveWire);
-  activeConnection = null;
-}
-drawWires();
+function handleWireRelease(event) {
+  if (!isDragging || !currentWire) return;
+  
+  event.preventDefault();
+  
+  const rect = wireCanvas.getBoundingClientRect();
+  const endPoint = document.elementFromPoint(event.clientX, event.clientY);
+  
+  if (endPoint && endPoint.classList.contains('wire-point') && endPoint.id.startsWith('right')) {
+    const endRect = endPoint.getBoundingClientRect();
+    const equation = endPoint.dataset.equation;
+    const computed = eval(equation);
+    const startValue = parseInt(currentWire.startPoint.textContent);
+    
+    if (startValue === computed) {
+      wiresConnected[currentWire.id] = {
+        startX: currentWire.startX,
+        startY: currentWire.startY,
+        endX: endRect.left - rect.left + endRect.width / 2,
+        endY: endRect.top - rect.top + endRect.height / 2,
+        controlPoint1X: 0,
+        controlPoint1Y: 0,
+        controlPoint2X: 0,
+        controlPoint2Y: 0
+      };
+      updateWirePhysics(wiresConnected[currentWire.id]);
+      checkWires();
+    }
+  }
+  
+  // Очищаем состояние
+  currentWire.startPoint.classList.remove('active');
+  isDragging = false;
+  currentWire = null;
+  
+  // Удаляем слушатели
+  document.removeEventListener('mousemove', handleWireDrag);
+  document.removeEventListener('mouseup', handleWireRelease);
+  
+  drawWires();
 }
 
-function drawWires(tempEndX, tempEndY) {
-wireCtx.clearRect(0, 0, wireCanvas.width, wireCanvas.height);
-for (let id in wiresConnected) {
-  let { startX, startY, endX, endY } = wiresConnected[id];
-  wireCtx.beginPath();
-  wireCtx.strokeStyle = "#00ff00";
-  wireCtx.lineWidth = 5;
-  wireCtx.shadowColor = "#00ff00";
-  wireCtx.shadowBlur = 15;
-  wireCtx.lineCap = "round";
-  wireCtx.moveTo(startX, startY);
-  wireCtx.lineTo(endX, endY);
-  wireCtx.stroke();
-  wireCtx.shadowBlur = 0;
+function updateWirePhysics(wire) {
+    const dx = wire.endX - wire.startX;
+    const dy = wire.endY - wire.startY;
+    const distance = Math.sqrt(dx * dx + dy * dy);
+    
+    // Увеличиваем провисание в зависимости от длины провода
+    const sag = distance * 0.15;
+    
+    // Вычисляем промежуточные точки для более плавной кривой
+    wire.controlPoint1X = wire.startX + dx * 0.25;
+    wire.controlPoint1Y = wire.startY + dy * 0.25 + sag;
+    
+    wire.controlPoint2X = wire.startX + dx * 0.75;
+    wire.controlPoint2Y = wire.startY + dy * 0.75 + sag;
 }
-if (activeConnection) {
-  wireCtx.beginPath();
-  wireCtx.strokeStyle = "#00ff00";
-  wireCtx.lineWidth = 3;
-  wireCtx.moveTo(activeConnection.startX, activeConnection.startY);
-  let endX = tempEndX || activeConnection.startX;
-  let endY = tempEndY || activeConnection.startY;
-  wireCtx.lineTo(endX, endY);
-  wireCtx.stroke();
+
+function drawWirePath(wire, isTemp = false) {
+    wireCtx.beginPath();
+    wireCtx.strokeStyle = "#00ff00";
+    wireCtx.lineWidth = 4;
+    wireCtx.lineCap = "round";
+    
+    if (isTemp) {
+        const dx = wire.endX - wire.startX;
+        const dy = wire.endY - wire.startY;
+        const distance = Math.sqrt(dx * dx + dy * dy);
+        const sag = distance * 0.15;
+        
+        const cp1x = wire.startX + dx * 0.25;
+        const cp1y = wire.startY + dy * 0.25 + sag;
+        const cp2x = wire.startX + dx * 0.75;
+        const cp2y = wire.startY + dy * 0.75 + sag;
+        
+        wireCtx.moveTo(wire.startX, wire.startY);
+        wireCtx.bezierCurveTo(cp1x, cp1y, cp2x, cp2y, wire.endX, wire.endY);
+    } else {
+        wireCtx.moveTo(wire.startX, wire.startY);
+        wireCtx.bezierCurveTo(
+            wire.controlPoint1X, wire.controlPoint1Y,
+            wire.controlPoint2X, wire.controlPoint2Y,
+            wire.endX, wire.endY
+        );
+    }
+    
+    // Добавляем эффект свечения
+    wireCtx.shadowColor = "#00ff00";
+    wireCtx.shadowBlur = 15;
+    wireCtx.stroke();
+    wireCtx.shadowBlur = 0;
 }
+
+function drawWires() {
+    wireCtx.clearRect(0, 0, wireCanvas.width, wireCanvas.height);
+    
+    // Отрисовка существующих соединений
+    for (let id in wiresConnected) {
+        const wire = wiresConnected[id];
+        drawWirePath(wire);
+    }
+    
+    // Отрисовка текущего перетаскиваемого провода
+    if (isDragging && currentWire) {
+        drawWirePath({
+            startX: currentWire.startX,
+            startY: currentWire.startY,
+            endX: mouseX,
+            endY: mouseY
+        }, true);
+    }
 }
 
 function checkWires() {
-if (Object.keys(wiresConnected).length === 4) {
-  document.getElementById('result2').textContent = "Провода соединены правильно! Что дальше?";
-  document.getElementById('result2').className = "";
-  addChoices(2);
-}
+    const requiredConnections = [
+        ['v1', 'right4'], // 16 = 2⁴
+        ['v2', 'right3'], // 6 = 3!
+        ['v3', 'right2'], // 2 = √4
+        ['v4', 'right1'], // 1 = cos(0)
+        ['v5', 'right5'], // 24 = 2³×3
+        ['v6', 'right6']  // 8 = 2³
+    ];
+
+    let allCorrect = requiredConnections.every(([wireId, targetId]) => {
+        if (!wiresConnected[wireId]) return false;
+        const targetElement = document.getElementById(targetId);
+        const targetRect = targetElement.getBoundingClientRect();
+        const wireRect = wireCanvas.getBoundingClientRect();
+        const endX = targetRect.left - wireRect.left + targetRect.width / 2;
+        const endY = targetRect.top - wireRect.top + targetRect.height / 2;
+        
+        return Math.abs(wiresConnected[wireId].endX - endX) < 10 && 
+               Math.abs(wiresConnected[wireId].endY - endY) < 10;
+    });
+
+    if (allCorrect) {
+        setTimeout(() => {
+            document.getElementById('wireTask').style.boxShadow = '0 0 20px #00ff00';
+            document.getElementById('result2').textContent = "Схема собрана правильно! Можно двигаться дальше.";
+            document.getElementById('result2').className = "";
+            
+            // Добавляем кнопку "Продолжить"
+            if (!document.getElementById('continueBtn')) {
+                const continueBtn = document.createElement('button');
+                continueBtn.id = 'continueBtn';
+                continueBtn.className = 'btn';
+                continueBtn.textContent = 'Продолжить';
+                continueBtn.onclick = () => showNextStep(3);
+                document.getElementById('result2').appendChild(continueBtn);
+            }
+        }, 500);
+    }
 }
 
 function solveRebus() {
@@ -695,8 +823,8 @@ drawBlinkGame();
 }
 
 function updateBlinkGame() {
-contemporaryBlink = {
-  x: Math.random() * (blinkCanvas.width - forty) + 20,
+currentBlink = {
+  x: Math.random() * (blinkCanvas.width - 40) + 20,
   y: Math.random() * (blinkCanvas.height - 40) + 20,
   r: 18
 };
@@ -704,7 +832,7 @@ drawBlinkGame();
 }
 
 function drawBlinkGame() {
-blinkCtx.clearRect(zero, 0, blinkCanvas.width, blinkCanvas.height);
+blinkCtx.clearRect(0, 0, blinkCanvas.width, blinkCanvas.height);
 if (currentBlink) {
   blinkCtx.beginPath();
   blinkCtx.fillStyle = "#00ff00";
