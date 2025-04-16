@@ -1,0 +1,530 @@
+<script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function loadFileData(filename) {
+        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+            try {
+                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                var firstSheetName = workbook.SheetNames[0];
+                var worksheet = workbook.Sheets[firstSheetName];
+
+                // Convert sheet to JSON to filter blank rows
+                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                // Filter out blank rows (rows where all cells are empty, null, or undefined)
+                var filteredData = jsonData.filter(row =>
+                    row.some(cell => cell !== '' && cell !== null && cell !== undefined)
+                );
+
+                // Convert filtered JSON back to CSV
+                var csv = XLSX.utils.aoa_to_sheet(filteredData); // Create a new sheet from filtered array of arrays
+                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                return csv;
+            } catch (e) {
+                console.error(e);
+                return "";
+            }
+        }
+        return gk_fileData[filename] || "";
+        }
+        </script><!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>По следам Профессора Логарифма</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Courier New', monospace;
+            background: #1a1a1a;
+            color: #00ff00;
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+            position: relative;
+        }
+        canvas.matrix {
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: -1;
+            opacity: 0.2;
+        }
+        header {
+            background: #0d1b2a;
+            padding: 1rem;
+            box-shadow: 0 0 10px #00ff00;
+            position: relative;
+            z-index: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        .header-content {
+            display: flex;
+            align-items: center;
+            width: 100%;
+            max-width: 1000px;
+            position: relative;
+        }
+        .logo {
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 80px;
+            height: 80px;
+        }
+        h1 {
+            text-shadow: 0 0 5px #00ff00;
+            margin: 0 0 1rem 100px;
+            text-align: left;
+            font-size: 1.5rem;
+        }
+        h2 {
+            text-shadow: 0 0 5px #00ff00;
+            margin: 0;
+        }
+        nav {
+            margin-top: 1rem;
+        }
+        nav ul {
+            display: flex;
+            list-style: none;
+            justify-content: center;
+            margin: 0;
+            padding: 0;
+        }
+        nav ul li {
+            margin: 0 1rem;
+        }
+        nav ul li a {
+            color: #00ff00;
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            transition: all 0.3s;
+            font-weight: 500;
+            position: relative;
+        }
+        nav ul li a::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            width: 0;
+            height: 2px;
+            background: #00ff00;
+            transition: all 0.3s;
+            transform: translateX(-50%);
+        }
+        nav ul li a:hover::after, nav ul li a.active::after {
+            width: 80%;
+        }
+        nav ul li a:hover, nav ul li a.active {
+            transform: translateY(-2px);
+        }
+        main {
+            max-width: 1000px;
+            margin: 2rem auto;
+            padding: 1rem;
+            position: relative;
+            z-index: 1;
+        }
+        .developers {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2rem;
+        }
+        .developers h2 {
+            grid-column: 1 / -1;
+            text-align: center;
+            margin-bottom: 1.5rem;
+        }
+        .developer-card {
+            background-color: #2c2c2c;
+            border-radius: 12px;
+            box-shadow: 0 6px 15px rgba(0,0,0,0.1);
+            padding: 2rem;
+            margin-bottom: 2rem;
+            position: relative;
+            overflow: hidden;
+            perspective: 1000px;
+            transition: transform 0.3s, box-shadow 0.3s;
+            height: 400px;
+        }
+        .developer-card:hover {
+            transform: translateY(-5px) rotate(2deg);
+            box-shadow: 0 12px 20px rgba(0,0,0,0.15), 0 0 20px rgba(0, 255, 0, 0.3);
+        }
+        .developer-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 8px;
+            background: linear-gradient(to right, #00ff00, #00cc00);
+            transition: height 0.3s;
+        }
+        .developer-card:hover::before {
+            height: 12px;
+        }
+        .developer-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            transition: transform 0.6s;
+            transform-style: preserve-3d;
+        }
+        .developer-card:hover .developer-inner {
+            transform: rotateY(180deg);
+        }
+        .developer-front, .developer-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 1rem;
+            box-sizing: border-box;
+        }
+        .developer-front {
+            z-index: 2;
+        }
+        .developer-back {
+            transform: rotateY(180deg);
+            background-color: #1f2a44;
+            color: #00ff00;
+            padding: 1.5rem;
+        }
+        .developer-back p {
+            margin: 0.5rem 0;
+            line-height: 1.4;
+            font-size: 0.9rem;
+            max-width: 90%;
+            overflow-wrap: break-word;
+        }
+        .developer-back .developer-contact {
+            font-size: 0.8rem;
+            word-break: break-all;
+            margin-top: 1rem;
+        }
+        .developer-card .image-container {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            overflow: hidden;
+            border: 5px solid #003300;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            margin-bottom: 1.5rem;
+            transition: transform 0.3s;
+            position: relative;
+            aspect-ratio: 1 / 1;
+        }
+        .developer-card:hover .image-container {
+            transform: scale(1.05);
+        }
+        .developer-card img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            object-position: center;
+            display: block;
+            border-radius: 50%;
+        }
+        .developer-card h3 {
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+            color: #00ff00;
+        }
+        .developer-card p {
+            margin: 0.5rem 0;
+            line-height: 1.5;
+        }
+        .developer-skills {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 0.5rem;
+            margin: 1rem 0;
+        }
+        .skill-tag {
+            background-color: #003300;
+            color: #00ff00;
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            transition: transform 0.2s, color 0.3s, background-color 0.3s;
+        }
+        .skill-tag:hover {
+            transform: scale(1.1);
+            color: #00ff00;
+            background-color: #005500;
+        }
+        .developer-contact {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-top: 1rem;
+            color: #00ff00;
+            text-decoration: none;
+            transition: color 0.3s, transform 0.3s;
+        }
+        .developer-contact:hover {
+            color: #3498db;
+            transform: translateX(5px);
+        }
+        .team-description {
+            text-align: center;
+            max-width: 800px;
+            margin: 0 auto 2rem auto;
+            color: #00ff00;
+            line-height: 1.7;
+            padding: 1rem;
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 10px;
+        }
+        footer {
+            background: #0d1b2a;
+            color: white;
+            text-align: center;
+            padding: 2rem 1rem;
+            margin-top: 3rem;
+            position: relative;
+        }
+        footer p {
+            margin: 0;
+            font-size: 0.9rem;
+        }
+        .social-links {
+            display: flex;
+            justify-content: center;
+            gap: 1.5rem;
+            margin: 1rem 0;
+        }
+        .social-links a {
+            color: #00ff00;
+            font-size: 1.5rem;
+            transition: transform 0.3s, color 0.3s;
+        }
+        .social-links a:hover {
+            transform: translateY(-3px);
+            color: #3498db;
+        }
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                align-items: center;
+            }
+            .logo {
+                position: static;
+                transform: none;
+                margin-bottom: 1rem;
+            }
+            h1 {
+                margin: 0;
+                text-align: center;
+                font-size: 1.2rem;
+            }
+            nav ul {
+                flex-direction: column;
+            }
+            nav ul li {
+                margin: 0.5rem 0;
+            }
+            .developers {
+                grid-template-columns: 1fr;
+            }
+            .developer-back p {
+                font-size: 0.8rem;
+            }
+            .developer-back .developer-contact {
+                font-size: 0.7rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <canvas class="matrix" id="matrix"></canvas>
+    <header>
+        <div class="header-content">
+            <img src="https://i.postimg.cc/q74Fdnpr/IMG-20250415-113958.png" alt="Logo" class="logo">
+            <h1>По следам Профессора Логарифма</h1>
+        </div>
+        <nav>
+            <ul>
+                <li><a href="index.html">Главная</a></li>
+                <li><a href="developers.html" class="active">Разработчики</a></li>
+                <li><a href="support.html">Поддержка</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <section class="developers">
+            <h2>Наша команда</h2>
+            
+            <div class="team-description">
+                <p>Мы — команда энтузиастов, объединенных любовью к математике и образовательным технологиям. Наша цель — сделать изучение математики увлекательным и доступным для всех. Каждый член команды вносит свой уникальный вклад в создание интерактивных квестов и обучающих материалов.</p>
+            </div>
+            
+            <div class="developer-card">
+                <div class="developer-inner">
+                    <div class="developer-front">
+                        <div class="image-container">
+                            <img src="https://randomuser.me/api/portraits/men/32.jpg" alt="Олег Ташевский">
+                        </div>
+                        <h3>Олег Ташевский</h3>
+                        <p>Главный разработчик интерфейса и дизайна</p>
+                        <div class="developer-skills">
+                            <span class="skill-tag">HTML/CSS</span>
+                            <span class="skill-tag">JavaScript</span>
+                            <span class="skill-tag">UI/UX Design</span>
+                            <span class="skill-tag">React</span>
+                        </div>
+                    </div>
+                    <div class="developer-back">
+                        <p>Опыт работы: 5 лет</p>
+                        <p>Создает интуитивно понятные и стильные интерфейсы, вдохновленные киберпанком.</p>
+                        <a href="mailto:olegyaskevich228@gmail.com" class="developer-contact">
+                            <i class="fas fa-envelope"></i> olegyaskevich228@gmail.com
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="developer-card">
+                <div class="developer-inner">
+                    <div class="developer-front">
+                        <div class="image-container">
+                            <img src="https://randomuser.me/api/portraits/men/44.jpg" alt="Илья Волощук">
+                        </div>
+                        <h3>Илья Волощук</h3>
+                        <p>Разработчик логики квестов и математических задач</p>
+                        <div class="developer-skills">
+                            <span class="skill-tag">Python</span>
+                            <span class="skill-tag">Математика</span>
+                            <span class="skill-tag">Алгоритмы</span>
+                            <span class="skill-tag">Node.js</span>
+                        </div>
+                    </div>
+                    <div class="developer-back">
+                        <p>Опыт работы: 4 года</p>
+                        <p>Мастер головоломок и математических загадок, делающих квесты захватывающими.</p>
+                        <a href="mailto:ilyavoloshchuk@gmail.com" class="developer-contact">
+                            <i class="fas fa-envelope"></i> ilyavoloshchuk@gmail.com
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="developer-card">
+                <div class="developer-inner">
+                    <div class="developer-front">
+                        <div class="image-container">
+                            <img src="https://avatars.mds.yandex.net/i?id=7f87d8c340723e5eea4207d061d151b9_l-4555287-images-thumbs&n=13" alt="Иван Щербаков">
+                        </div>
+                        <h3>Иван Щербаков</h3>
+                        <p>Разработчик backend-части и системной логики</p>
+                        <div class="developer-skills">
+                            <span class="skill-tag">Python</span>
+                            <span class="skill-tag">C++</span>
+                            <span class="skill-tag">Алгоритмы</span>
+                            <span class="skill-tag">Системное программирование</span>
+                        </div>
+                    </div>
+                    <div class="developer-back">
+                        <p>Опыт работы: 8 лет (Python), 3 года (C++)</p>
+                        <p>Обеспечивает надежную и быструю работу серверной части проекта.</p>
+                        <a href="mailto:ivanscherbakov@gmail.com" class="developer-contact">
+                            <i class="fas fa-envelope"></i> ivanscherbakov@gmail.com
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="social-links">
+            <a href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+            <a href="#" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
+            <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+            <a href="#" aria-label="YouTube"><i class="fab fa-youtube"></i></a>
+        </div>
+        <p>© 2025 По следам Профессора Логарифма | Все права защищены</p>
+    </footer>
+
+    <script>
+        // Matrix effect
+        const canvas = document.getElementById('matrix');
+        const ctx = canvas.getContext('2d');
+        canvas.height = window.innerHeight;
+        canvas.width = window.innerWidth;
+        const chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+        const fontSize = 14;
+        const columns = canvas.width / fontSize;
+        const drops = [];
+
+        for (let x = 0; x < columns; x++) {
+            drops[x] = 1;
+        }
+
+        function draw() {
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = '#00ff00';
+            ctx.font = fontSize + 'px monospace';
+
+            for (let i = 0; i < drops.length; i++) {
+                const text = chars.charAt(Math.floor(Math.random() * chars.length));
+                ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+                if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+                    drops[i] = 0;
+                }
+                drops[i]++;
+            }
+        }
+
+        setInterval(draw, 33);
+
+        // Animations and interactivity
+        document.addEventListener('DOMContentLoaded', function() {
+            const header = document.querySelector('header');
+            header.style.opacity = '0';
+            setTimeout(() => {
+                header.style.opacity = '1';
+                header.style.transition = 'opacity 0.8s ease-in-out';
+            }, 200);
+
+            const cards = document.querySelectorAll('.developer-card');
+            cards.forEach((card, index) => {
+                card.style.opacity = '0';
+                card.style.transform = 'translateY(20px)';
+                setTimeout(() => {
+                    card.style.opacity = '1';
+                    card.style.transform = 'translateY(0)';
+                    card.style.transition = `opacity 0.5s ease-out ${index * 0.2}s, transform 0.5s ease-out ${index * 0.2}s`;
+                }, 200);
+            });
+
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    document.querySelector(this.getAttribute('href')).scrollIntoView({
+                        behavior: 'smooth'
+                    });
+                });
+            });
+        });
+    </script>
+</body>
+</html>
