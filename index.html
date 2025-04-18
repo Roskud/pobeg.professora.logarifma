@@ -117,7 +117,6 @@
                         '— <b>joke</b> — случайная шутка<br>' +
                         '— <b>matrix</b> — войти в матрицу<br>' +
                         '— <b>dance</b> — станцевать<br>' +
-                        '— <b>secret</b> — получить секрет<br>' +
                         '— <b>clear</b> — очистить терминал';
                     animated = true;
                 } else if (command === 'status') {
@@ -345,6 +344,105 @@
         function openSecretZone() {
             document.getElementById('secretZone').style.display = 'flex';
         }
+
+        // --- ПАСХАЛЬНОЕ ЯЙЦО: ПОЕЗД МАТРИЦЫ ---
+        function matrixTrainEasterEgg() {
+            // Создаём контейнер для анимации
+            let trainModal = document.createElement('div');
+            trainModal.id = 'matrixTrainModal';
+            trainModal.style = `
+                position:fixed;top:0;left:0;width:100vw;height:100vh;z-index:4000;
+                background:rgba(0,0,0,0.97);display:flex;align-items:center;justify-content:center;flex-direction:column;
+                overflow:hidden;
+            `;
+            trainModal.innerHTML = `
+                <div style="width:100vw;height:100vh;position:relative;overflow:hidden;">
+                    <pre id="matrixTrainAnim" style="
+                        font-family: 'Cascadia Mono', 'Fira Mono', 'Consolas', monospace;
+                        color:#00ff00;
+                        font-size:1.3rem;
+                        text-shadow:0 0 8px #00ff00,0 0 24px #00ff00;
+                        position:absolute;left:-600px;top:40vh;white-space:pre;
+                        transition: left 0.1s;
+                    "></pre>
+                    <div style="position:absolute;top:10vh;left:0;width:100vw;height:80vh;pointer-events:none;z-index:-1;">
+                        <canvas id="matrixTrainBg" width="1920" height="600" style="width:100vw;height:80vh;opacity:0.18;"></canvas>
+                    </div>
+                </div>
+                <button id="matrixTrainClose" class="start-btn" style="position:absolute;top:2rem;right:2rem;">Закрыть</button>
+            `;
+            document.body.appendChild(trainModal);
+
+            // Анимация поезда
+            const trainFrames = [
+`      _________
+  ___|_______|___
+ |   [ 0 0 ]   |
+ |   [ 0 0 ]   |____
+ |___[_____]___|    \\_____
+   O         O           O`,
+`         _________
+     ___|_______|___
+    |   [ 0 0 ]   |
+    |   [ 0 0 ]   |____
+    |___[_____]___|    \\_____
+      O         O           O`,
+`                _________
+            ___|_______|___
+           |   [ 0 0 ]   |
+           |   [ 0 0 ]   |____
+           |___[_____]___|    \\_____
+             O         O           O`
+            ];
+            let frame = 0;
+            let pos = -600;
+            const train = document.getElementById('matrixTrainAnim');
+            function animateTrain() {
+                train.textContent = trainFrames[frame % trainFrames.length];
+                train.style.left = pos + 'px';
+                frame++;
+                pos += 24;
+                if (pos < window.innerWidth + 100) {
+                    setTimeout(animateTrain, 80);
+                } else {
+                    setTimeout(() => {
+                        train.textContent = "🚂 Пасхальный поезд ушёл в Матрицу!\n\nСекретный код: M4TR1X";
+                        train.style.left = "30vw";
+                    }, 600);
+                }
+            }
+            animateTrain();
+
+            // Фоновая матрица
+            const canvas = document.getElementById('matrixTrainBg');
+            const ctx = canvas.getContext('2d');
+            const chars = '01';
+            const fontSize = 22;
+            const columns = Math.floor(canvas.width / fontSize);
+            const drops = Array(columns).fill(1);
+            function drawMatrixBg() {
+                ctx.fillStyle = 'rgba(0,0,0,0.08)';
+                ctx.fillRect(0,0,canvas.width,canvas.height);
+                ctx.fillStyle = '#00ff00';
+                ctx.font = fontSize + "px monospace";
+                for(let i=0;i<drops.length;i++){
+                    const text = chars[Math.floor(Math.random()*chars.length)];
+                    ctx.fillText(text, i*fontSize, drops[i]*fontSize);
+                    if(drops[i]*fontSize > canvas.height && Math.random() > 0.975) drops[i]=0;
+                    drops[i]++;
+                }
+                if(document.getElementById('matrixTrainModal')) {
+                    requestAnimationFrame(drawMatrixBg);
+                }
+            }
+            drawMatrixBg();
+
+            // Кнопка закрытия
+            document.getElementById('matrixTrainClose').onclick = () => {
+                document.body.removeChild(trainModal);
+            };
+        }
+
         // Добавим команду в терминал
         const origHandleTerminal = handleTerminal;
         window.handleTerminal = function(event) {
@@ -355,10 +453,14 @@
                     input.value = '';
                     return;
                 }
+                if(input.value.trim().toUpperCase() === 'M4TR1X') {
+                    matrixTrainEasterEgg();
+                    input.value = '';
+                    return;
+                }
             }
             origHandleTerminal(event);
         };
     </script>
 </body>
 </html>
-``` 

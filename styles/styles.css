@@ -813,34 +813,26 @@ body.index::before {
 .submit-btn {
     background: linear-gradient(90deg, #00ff00 60%, #00ffea 100%);
     color: #fff;
-    border: none;
-    padding: 0.75rem 1.5rem;
-    border-radius: 24px;
-    cursor: pointer;
-    transition: all 0.3s;
-    font-weight: bold;
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    box-shadow: 0 0 16px #00ffea;
-    width: 100%;
-    justify-content: center;
     font-size: 1.15rem;
+    border-radius: 24px;
+    box-shadow: 0 0 16px #00ffea, 0 0 32px #00ff00 inset;
+    font-weight: bold;
     letter-spacing: 1px;
+    transition: all 0.3s, box-shadow 0.4s;
+    border: none;
+    padding: 0.8rem 2.2rem;
+    position: relative;
+    overflow: hidden;
 }
-
 .submit-btn:hover {
     background: linear-gradient(90deg, #00ffea 60%, #00ff00 100%);
     color: #222;
-    transform: scale(1.05);
+    transform: scale(1.07) rotate(-1deg);
+    box-shadow: 0 0 32px #00ffea, 0 0 48px #00ff00 inset;
 }
-
-.submit-btn i {
-    transition: transform 0.3s;
-}
-
-.submit-btn:hover i {
-    transform: translateX(3px);
+.submit-btn:active {
+    filter: brightness(0.9);
+    transform: scale(0.98);
 }
 
 .success-message {
@@ -862,172 +854,352 @@ body.index::before {
 }
 
 .faq-item {
-    background: linear-gradient(135deg, #232c23 70%, #003300 100%);
-    border-radius: 16px;
-    box-shadow: 0 0 16px #00ffea inset, 0 2px 8px #00ff00;
+    border-radius: 18px;
+    box-shadow: 0 0 24px #00ffea, 0 0 32px #00ff00 inset;
     margin-bottom: 1.5rem;
+    background: linear-gradient(135deg, #0a1a0a 70%, #003300 100%);
+    transition: box-shadow 0.4s, background 0.4s, transform 0.3s;
+    position: relative;
     overflow: hidden;
-    transition: box-shadow 0.3s, background 0.3s;
+    animation: fadeInUp 0.7s;
 }
-
 .faq-item:hover {
-    box-shadow: 0 0 24px #00ffea, 0 4px 16px #00ff00;
+    box-shadow: 0 0 48px #00ffea, 0 0 48px #00ff00 inset;
     background: linear-gradient(135deg, #003300 60%, #00ffea 100%);
+    transform: scale(1.02) rotate(-1deg);
 }
 
 .faq-question {
-    padding: 1.5rem;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    cursor: pointer;
-    font-weight: bold;
+    font-size: 1.18rem;
+    letter-spacing: 1px;
     color: #00ffea;
     background: #002200;
-    transition: background-color 0.3s;
-    font-size: 1.15rem;
-    letter-spacing: 1px;
     border-bottom: 1px solid #00ff00;
-    border-radius: 16px 16px 0 0;
+    border-radius: 18px 18px 0 0;
+    padding: 1.1rem 2.5rem 1.1rem 1.5rem;
+    cursor: pointer;
+    font-family: 'Cascadia Mono', 'Fira Mono', 'Consolas', monospace;
+    font-weight: bold;
+    box-shadow: 0 0 12px #00ffea inset;
+    position: relative;
+    transition: background 0.3s, color 0.3s;
+    user-select: none;
 }
-
+.faq-question.active,
 .faq-question:hover {
-    background-color: #003300;
+    background: #00ff00;
+    color: #181f18;
+    text-shadow: 0 0 8px #00ffea;
 }
 
 .faq-question i {
-    transition: transform 0.3s;
+    position: absolute;
+    right: 1.5rem;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 1.3rem;
+    color: #00ffea;
+    transition: color 0.3s, transform 0.4s;
+    pointer-events: none;
 }
-
 .faq-question.active i {
-    transform: rotate(180deg);
+    color: #00ff00;
+    transform: translateY(-50%) rotate(180deg) scale(1.2);
 }
 
 .faq-answer {
+    background: #181f18;
+    border-radius: 0 0 18px 18px;
+    color: #00ff00;
+    font-size: 1.08rem;
     max-height: 0;
     overflow: hidden;
-    transition: max-height 0.5s ease-out;
+    opacity: 0;
     padding: 0 1.5rem;
-    color: #00ff00;
-    line-height: 1.7;
-    background: #181f18;
-    border-radius: 0 0 16px 16px;
-    font-size: 1.08rem;
+    transition: max-height 0.5s cubic-bezier(.4,2,.6,1), opacity 0.5s, padding 0.5s;
+    box-shadow: 0 0 12px #00ffea inset;
 }
-
 .faq-answer.active {
-    max-height: 500px;
-    padding: 1.5rem;
+    max-height: 300px;
+    opacity: 1;
+    padding: 1.2rem 1.5rem 1.5rem 1.5rem;
+    animation: fadeIn 0.7s;
 }
 
+/* Анимации */
+@keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(30px);}
+    to { opacity: 1; transform: none;}
+}
 @keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
+    from { opacity: 0;}
+    to { opacity: 1;}
+}
+
+/* Пульсация для заголовков */
+.support h2, .faq h2 {
+    color: #00ffea;
+    text-shadow: 0 0 16px #00ffea, 0 0 32px #00ff00;
+    animation: neonPulse 2.5s infinite alternate;
+    letter-spacing: 2px;
+}
+@keyframes neonPulse {
+    from { text-shadow: 0 0 8px #00ffea, 0 0 16px #00ff00;}
+    to { text-shadow: 0 0 32px #00ffea, 0 0 48px #00ff00;}
 }
 
 /* Styles specific to quest.html */
 .door-container {
-    position: relative;
-    width: 100%;
-    height: 500px;
-    margin: 2rem auto;
     display: flex;
-    justify-content: center;
+    flex-direction: column;
     align-items: center;
-    perspective: 1000px;
+    justify-content: center;
+    min-height: 80vh;
+    position: relative;
 }
 
-.door-frame {
-    width: 480px;
-    height: 640px;
-    background: linear-gradient(135deg, #003300, #001a00);
-    border-radius: 10px;
-    box-shadow: 0 0 30px rgba(0, 255, 0, 0.3);
-    position: absolute;
-    z-index: 1;
+/* Рамка и фон за дверью */
+.door-frame,
+.lab-bg-clip {
+    width: 340px;
+    height: 520px;
+    border-radius: 32px;
     border: 10px solid #00ff00;
+    box-shadow: 0 0 48px #00ff00, 0 0 32px #00ffea inset;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 1;
+    background: linear-gradient(135deg, #003300 60%, #001a00 100%);
+    pointer-events: none;
+    animation: neonPulse 2s infinite alternate;
 }
 
+/* Дверь чуть больше */
 .door {
-    width: 400px;
-    height: 600px;
-    background: linear-gradient(135deg, #1a1a1a, #0d1b2a);
-    border-radius: 10px;
-    box-shadow: 0 0 20px rgba(0, 255, 0, 0.2);
-    position: relative;
-    transform-style: preserve-3d;
-    transition: transform 1.5s;
+    margin: 0 auto;
     display: flex;
-    justify-content: center;
     align-items: center;
+    justify-content: center;
+    width: 364px;
+    height: 544px;
+    border-radius: 32px; /* Сделайте такой же радиус, как у рамки! */
+    background: linear-gradient(135deg, #232323 70%, #222c22 100%);
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    cursor: pointer;
+    transition: box-shadow 0.4s, transform 0.4s;
+    overflow: visible;
     z-index: 2;
     transform-origin: left center;
+    box-shadow: none;
 }
 
-.door::before {
-    content: "";
-    position: absolute;
-    top: 0;
-    left: 0;
+/* Панель двери */
+.door-panel {
     width: 100%;
     height: 100%;
-    background: linear-gradient(135deg, rgba(0, 255, 0, 0.1), rgba(0, 255, 0, 0.2));
-    border-radius: 10px;
+    /* Заменяем градиент на текстуру */
+    background: url('../images/door.png') center/cover no-repeat, linear-gradient(120deg, #232323 70%, #003300 100%);
+    border-radius: 32px;
+    position: relative;
+    box-shadow: 0 0 32px #00ff00 inset, 0 0 24px #00ffea;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-end;
+    overflow: hidden;
 }
 
+/* Фон внутри двери */
+.door-panel::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    z-index: 1;
+    transition: opacity 1s;
+    border-radius: 32px;
+    pointer-events: none;
+}
+
+.door.open .door-panel::before {
+    opacity: 1;
+}
+
+/* Поверх картинки все элементы панели */
+.door-panel > * {
+    position: relative;
+    z-index: 2;
+}
+
+/* Убираем окно двери */
+.door-panel .door-window {
+    display: none !important;
+}
+
+/* Более красивая ручка двери */
 .door-handle {
     position: absolute;
-    right: 20px;
+    right: 32px;
     top: 50%;
-    width: 30px;
-    height: 60px;
-    background: #00ff00;
-    border-radius: 15px;
-    transform: rotate(45deg);
+    transform: translateY(-50%);
+    width: 38px;
+    height: 38px;
+    background: radial-gradient(circle at 60% 40%, #ffd700 70%, #bfa100 100%);
+    border-radius: 50%;
+    box-shadow: 0 0 12px 4px #ffe066, 0 2px 8px #333 inset;
+    border: 3px solid #bfa100;
+    z-index: 2;
+    cursor: pointer;
+    transition: box-shadow 0.2s;
+}
+.door-handle::after {
+    content: '';
+    display: block;
+    position: absolute;
+    left: 50%;
+    top: 60%;
+    transform: translate(-50%, -50%);
+    width: 12px;
+    height: 12px;
+    background: #fffbe6;
+    border-radius: 50%;
+    opacity: 0.7;
+    box-shadow: 0 0 8px #fffbe6;
 }
 
 .door-text {
-    color: #00ff00;
-    font-size: 1.5rem;
+    color: #00ffea;
+    font-size: 1.25rem;
+    font-family: 'Cascadia Mono', 'Fira Mono', 'Consolas', monospace;
     text-align: center;
-    padding: 1rem;
+    margin-bottom: 2.5rem;
+    margin-top: auto;
+    text-shadow: 0 0 12px #00ffea, 0 0 24px #00ff00;
+    letter-spacing: 1px;
     z-index: 2;
+    animation: neonPulse 2.5s infinite alternate;
+}
+
+.door-egg {
+    position: absolute;
+    left: 12px;
+    top: 12px;
+    width: 32px;
+    height: 32px;
+    background: none;
+    cursor: pointer;
+    z-index: 5;
+}
+.door-egg::after {
+    content: "🥚";
+    font-size: 2rem;
+    opacity: 0.7;
+    filter: drop-shadow(0 0 8px #ffea00);
+    transition: transform 0.2s, filter 0.3s;
+}
+.door-egg:hover::after {
+    transform: scale(1.2) rotate(-10deg);
+    filter: drop-shadow(0 0 24px #ffea00);
 }
 
 .door.open {
-    transform: rotateY(-100deg);
+    animation: doorOpenSwing 1.2s forwards cubic-bezier(.77,0,.18,1.01);
+    box-shadow: 0 0 128px #00ffea, 0 0 64px #00ff00 inset;
+}
+
+.door.open ~ .lab-bg-clip .lab-bg-behind-door {
+    opacity: 0;
+    transition: opacity 0.7s;
+}
+
+@keyframes doorOpenSwing {
+    0% {
+        transform: translate(-50%, -50%) rotateY(0deg);
+    }
+    60% {
+        transform: translate(-50%, -50%) rotateY(-60deg);
+    }
+    100% {
+        transform: translate(-50%, -50%) rotateY(-105deg);
+    }
+}
+
+.lab-bg-clip {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 340px;
+    height: 520px;
+    transform: translate(-50%, -50%);
+    border-radius: 32px;
+    overflow: hidden;
+    z-index: 1;
+    pointer-events: none;
+}
+
+.lab-bg-behind-door {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 32px;
+    display: block;
+    position: absolute;
+    top: 0; left: 0;
+    opacity: 0.93;
+    box-shadow: 0 0 64px #00ff00aa;
+    transition: opacity 1s;
 }
 
 .matrix-background {
     position: absolute;
-    top: 0;
-    left: 0;
     width: 100%;
     height: 100%;
-    opacity: 0;
-    transition: opacity 1s;
-    background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><text x="0" y="20" fill="%2300ff00" font-family="monospace" font-size="20">1</text></svg>') repeat;
-    background-size: 50px 50px;
+    left: 0; top: 0;
     z-index: 0;
-}
-
-.door.open + .matrix-background {
-    opacity: 1;
+    opacity: 0.15;
+    pointer-events: none;
 }
 
 .message {
-    position: absolute;
-    color: #00ff00;
-    font-size: 1.5rem;
-    text-align: center;
-    padding: 1rem;
-    background: rgba(0, 0, 0, 0.7);
-    border-radius: 10px;
-    box-shadow: 0 0 15px rgba(0, 255, 0, 0.5);
     opacity: 0;
-    transform: translateY(-20px);
-    transition: opacity 0.5s, transform 0.5s;
-    z-index: 3;
+    transition: opacity 0.7s, transform 0.7s;
+    color: #00ff00;
+    font-size: 1.3rem;
+    text-align: center;
+    text-shadow: 0 0 16px #00ff00;
+    font-family: 'Cascadia Mono', 'Fira Mono', 'Consolas', monospace;
+    position: fixed;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 100;
+    width: 90%;
+    pointer-events: none;
+    margin: 0;
+}
+
+.secret-message {
+    display: none;
+    margin-top: 1.5rem;
+    color: #ffea00;
+    font-size: 1.15rem;
+    text-align: center;
+    background: #181f18;
+    border-radius: 16px;
+    box-shadow: 0 0 16px #ffea00 inset;
+    padding: 1rem 2rem;
+    font-family: 'Cascadia Mono', 'Fira Mono', 'Consolas', monospace;
+    animation: fadeIn 0.7s;
+    z-index: 10;
+    position: relative;
 }
 
 /* Styles specific to game.html */
@@ -1322,4 +1494,74 @@ main.game {
         text-align: center;
         font-size: 1.8rem;
     }
+}
+
+/* Пасхалки и интерактив */
+.easter-eggs-container {
+    position: relative;
+    margin: 2.5rem auto 0 auto;
+    text-align: center;
+    min-height: 60px;
+}
+.egg-btn {
+    background: linear-gradient(135deg, #00ffea 60%, #00ff00 100%);
+    color: #181f18;
+    border: none;
+    border-radius: 50%;
+    width: 48px;
+    height: 48px;
+    font-size: 2rem;
+    font-weight: bold;
+    box-shadow: 0 0 16px #00ffea, 0 0 24px #00ff00 inset;
+    cursor: pointer;
+    margin: 0 1rem;
+    transition: transform 0.2s, box-shadow 0.3s;
+    animation: pulse 2s infinite;
+    position: relative;
+    z-index: 2;
+}
+.egg-btn:hover {
+    transform: scale(1.15) rotate(-10deg);
+    box-shadow: 0 0 32px #00ffea, 0 0 32px #00ff00 inset;
+}
+.egg-hint {
+    margin-top: 1.2rem;
+    background: #002200;
+    color: #00ffea;
+    border-radius: 16px;
+    padding: 1rem 2rem;
+    box-shadow: 0 0 16px #00ffea inset;
+    font-size: 1.15rem;
+    display: inline-block;
+    animation: fadeIn 0.7s;
+}
+.egg-code {
+    color: #ffea00;
+    font-family: 'Cascadia Mono', 'Fira Mono', 'Consolas', monospace;
+    font-size: 1.1em;
+    letter-spacing: 2px;
+    text-shadow: 0 0 8px #ffea00;
+}
+.egg-pixel {
+    display: inline-block;
+    width: 24px;
+    height: 24px;
+    background: repeating-linear-gradient(45deg, #00ff00 0 4px, #00ffea 4px 8px);
+    border-radius: 6px;
+    margin-left: 1.5rem;
+    box-shadow: 0 0 8px #00ff00, 0 0 8px #00ffea inset;
+    cursor: pointer;
+    vertical-align: middle;
+    position: relative;
+    top: 6px;
+    transition: transform 0.2s, box-shadow 0.3s;
+    animation: pixelJump 1.5s infinite;
+}
+.egg-pixel:hover {
+    transform: scale(1.3) rotate(10deg);
+    box-shadow: 0 0 24px #00ffea, 0 0 24px #00ff00 inset;
+}
+@keyframes pixelJump {
+    0%, 100% { transform: translateY(0);}
+    50% { transform: translateY(-8px);}
 }

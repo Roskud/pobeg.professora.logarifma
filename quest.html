@@ -27,71 +27,108 @@
     <main>
         <div class="door-container">
             <div class="door-frame"></div>
-            <div class="door" id="door">
-                <div class="door-handle"></div>
-                <div class="door-text">Нажмите, чтобы открыть дверь в матрицу</div>
+            <div class="lab-bg-clip">
+                <img src="images/Lab.png" alt="Лаборатория" class="lab-bg-behind-door">
             </div>
-            <div class="matrix-background" id="matrixBackground"></div>
+            <div class="door" id="door">
+                <div class="door-panel">
+                    <div class="door-handle"></div>
+                    <div class="door-text" id="doorText">Нажмите, чтобы войти</div>
+                    <div class="door-egg" id="doorEgg" title="Пасхалка!"></div>
+                </div>
+            </div>
             <div class="message" id="message">Дверь открыта. Вы входите в матрицу...</div>
+            <div class="matrix-background" id="matrixBackground"></div>
+            <div class="secret-message" id="secretMessage">👾 Секретный код: <b>M4TR1X</b></div>
         </div>
     </main>
 
-    <!-- Удалён footer с соц. сетями и копирайтом
     <footer>
-        <p>© 2025 По следам Профессора Логарифма. Все права защищены.</p>
+        <p>&copy; 2025 По следам Профессора Логарифма. Все права защищены.</p>
         <div class="social-links">
             <a href="#"><i class="fab fa-twitter"></i></a>
             <a href="#"><i class="fab fa-facebook"></i></a>
             <a href="#"><i class="fab fa-instagram"></i></a>
         </div>
     </footer>
-    -->
 
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const door = document.getElementById('door');
-            const matrixBackground = document.getElementById('matrixBackground');
-            const message = document.getElementById('message');
+    // Эффект "Матрицы"
+    document.addEventListener('DOMContentLoaded', function() {
+        const canvas = document.getElementById('matrix');
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        const chars = '01';
+        const fontSize = 16;
+        const columns = canvas.width / fontSize;
+        const drops = Array(Math.floor(columns)).fill(0);
 
-            // Матричный эффект
-            const canvas = document.getElementById('matrix');
-            const ctx = canvas.getContext('2d');
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-            const chars = '01';
-            const fontSize = 16;
-            const columns = canvas.width / fontSize;
-            const drops = Array(Math.floor(columns)).fill(0);
+        function drawMatrix() {
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = '#00ff00';
+            ctx.font = fontSize + 'px monospace';
+            drops.forEach((y, i) => {
+                const text = chars[Math.floor(Math.random() * chars.length)];
+                const x = i * fontSize;
+                ctx.fillText(text, x, y);
+                if (y > canvas.height && Math.random() > 0.975) drops[i] = 0;
+                drops[i] += fontSize;
+            });
+            requestAnimationFrame(drawMatrix);
+        }
+        drawMatrix();
 
-            function drawMatrix() {
-                ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
-                ctx.fillRect(0, 0, canvas.width, canvas.height);
-                ctx.fillStyle = '#00ff00';
-                ctx.font = fontSize + 'px monospace';
-                drops.forEach((y, i) => {
-                    const text = chars[Math.floor(Math.random() * chars.length)];
-                    const x = i * fontSize;
-                    ctx.fillText(text, x, y);
-                    if (y > canvas.height && Math.random() > 0.975) drops[i] = 0;
-                    drops[i] += fontSize;
-                });
-                requestAnimationFrame(drawMatrix);
+        // Пасхалка по клику на яйцо
+        const doorEgg = document.getElementById('doorEgg');
+        const secretMessage = document.getElementById('secretMessage');
+        if (doorEgg && secretMessage) {
+            doorEgg.addEventListener('click', function(e) {
+                e.stopPropagation();
+                secretMessage.style.display = 'block';
+                secretMessage.innerHTML = '🥚 Пасхалка! Секретный код: <b>M4TR1X</b>';
+                setTimeout(() => {
+                    secretMessage.style.display = 'none';
+                }, 5000);
+            });
+        }
+
+        // Пасхалка: клавиатурная комбинация "matrix"
+        let eggSeq = '';
+        document.addEventListener('keydown', function(e) {
+            eggSeq += e.key.toLowerCase();
+            if (eggSeq.length > 6) eggSeq = eggSeq.slice(-6);
+            if (eggSeq === 'matrix' && secretMessage) {
+                secretMessage.style.display = 'block';
+                secretMessage.innerHTML = '👾 Ты ввёл секретное слово! <b>M4TR1X</b>';
+                setTimeout(() => {
+                    secretMessage.style.display = 'none';
+                }, 5000);
             }
-            drawMatrix();
+        });
 
-            // Открытие двери по клику
+        // Открытие двери по клику
+        const door = document.getElementById('door');
+        const message = document.getElementById('message');
+        const doorText = document.getElementById('doorText');
+        const doorEggDiv = document.getElementById('doorEgg');
+        if (door && message && doorText && doorEggDiv) {
             door.addEventListener('click', () => {
                 if (door.classList.contains('open')) return;
                 door.classList.add('open');
+                // Скрываем лишние надписи
+                doorText.style.display = 'none';
+                doorEggDiv.style.display = 'none';
+                // Показываем только сообщение
+                message.style.opacity = '1';
+                message.style.transform = 'translate(-50%, -50%)';
                 setTimeout(() => {
-                    message.style.opacity = '1';
-                    message.style.transform = 'translateY(0)';
-                    setTimeout(() => {
-                        window.location.href = 'game.html';
-                    }, 3000);
-                }, 1000);
+                    window.location.href = 'game.html';
+                }, 2200);
             });
-        });
+        }
+    });
     </script>
 </body>
 </html>

@@ -55,10 +55,10 @@
                     <button type="submit" class="submit-btn">
                         Отправить <i class="fas fa-paper-plane"></i>
                     </button>
-                    <div class="success-message" id="successMessage" style="display:none;">
-                        Ваше сообщение отправлено!
-                    </div>
                 </form>
+                <div class="success-message" id="successMessage" style="display:none;">
+                    Ваше сообщение отправлено!
+                </div>
             </div>
             
             <div class="faq">
@@ -71,16 +71,6 @@
                     </div>
                     <div class="faq-answer">
                         <p>Чтобы начать квест, перейдите на главную страницу, выберите интересующий вас квест по уровню сложности и нажмите кнопку "Начать". Вам будут последовательно предлагаться задания, которые нужно решить для продолжения квеста.</p>
-                    </div>
-                </div>
-                
-                <div class="faq-item">
-                    <div class="faq-question">
-                        <span>Можно ли пройти квест на мобильном устройстве?</span>
-                        <i class="fas fa-chevron-down"></i>
-                    </div>
-                    <div class="faq-answer">
-                        <p>Да, все наши квесты полностью адаптированы для мобильных устройств. Вы можете проходить их на смартфонах и планшетах с любыми современными операционными системами.</p>
                     </div>
                 </div>
                 
@@ -103,6 +93,14 @@
                         <p>В настоящее время все наши квесты абсолютно бесплатны. В будущем мы планируем добавить премиум-контент, но базовые квесты останутся доступными для всех пользователей без ограничений.</p>
                     </div>
                 </div>
+            </div>
+
+            <div class="easter-eggs-container">
+                <div class="egg-hint" id="eggHint" style="display:none;">
+                    <span>🥚 Поздравляем! Вы нашли пасхалку! <b>Секретный код:</b> <span class="egg-code">LOG42</span></span>
+                </div>
+                <button class="egg-btn" id="eggBtn" title="Нажми меня для сюрприза!">?</button>
+                <div class="egg-pixel" id="eggPixel" title="Кликни меня!"></div>
             </div>
         </section>
     </main>
@@ -152,7 +150,7 @@
 
         setInterval(draw, 33);
 
-        // Animations and interactivity
+        // Анимация появления элементов
         document.addEventListener('DOMContentLoaded', function() {
             const header = document.querySelector('header');
             header.style.opacity = '0';
@@ -170,60 +168,65 @@
                 card.style.transition = 'opacity 0.5s ease-out, transform 0.5s ease-out';
             }, 200);
 
-            const contactForm = document.getElementById('contactForm');
-            const successMessage = document.getElementById('successMessage');
-            const errorMessage = document.getElementById('errorMessage');
-
-            contactForm.addEventListener('submit', function(e) {
-                e.preventDefault();
-                successMessage.style.display = 'none';
-                errorMessage.style.display = 'none';
-
-                const formData = new FormData(contactForm);
-
-                fetch('sendmail.php', {
-                    method: 'POST',
-                    body: formData
-                })
-                .then(res => res.text())
-                .then(res => {
-                    if (res.trim() === "success") {
-                        contactForm.reset();
-                        contactForm.style.display = 'none';
-                        successMessage.style.display = 'block';
-                        setTimeout(() => {
-                            contactForm.style.display = 'block';
-                            successMessage.style.display = 'none';
-                        }, 5000);
-                    } else {
-                        errorMessage.style.display = 'block';
-                    }
-                })
-                .catch(() => {
-                    errorMessage.style.display = 'block';
-                });
-            });
-            
+            // Улучшенная анимация FAQ
             const faqQuestions = document.querySelectorAll('.faq-question');
-            
             faqQuestions.forEach(question => {
                 question.addEventListener('click', function() {
                     const answer = this.nextElementSibling;
                     const icon = this.querySelector('i');
-                    
-                    this.classList.toggle('active');
-                    answer.classList.toggle('active');
-                    icon.classList.toggle('fa-chevron-down');
-                    icon.classList.toggle('fa-chevron-up');
+                    const isActive = this.classList.contains('active');
+                    // Скрыть все остальные
+                    faqQuestions.forEach(q => {
+                        q.classList.remove('active');
+                        q.nextElementSibling.classList.remove('active');
+                        q.querySelector('i').classList.remove('fa-chevron-up');
+                        q.querySelector('i').classList.add('fa-chevron-down');
+                    });
+                    // Открыть выбранный
+                    if (!isActive) {
+                        this.classList.add('active');
+                        answer.classList.add('active');
+                        icon.classList.remove('fa-chevron-down');
+                        icon.classList.add('fa-chevron-up');
+                        // Плавный скролл к открытому вопросу
+                        setTimeout(() => {
+                            this.scrollIntoView({ behavior: "smooth", block: "center" });
+                        }, 300);
+                    }
                 });
             });
-        });
 
-        // Кастомное сообщение об успехе для Formspree
-        document.getElementById('contactForm').addEventListener('submit', function(e) {
-            setTimeout(() => {
-                document.getElementById('successMessage').style.display = 'block';
-            }, 1000);
+            // Пасхалка: кнопка ?
+            const eggBtn = document.getElementById('eggBtn');
+            const eggHint = document.getElementById('eggHint');
+            let eggShown = false;
+            if (eggBtn && eggHint) {
+                eggBtn.addEventListener('click', function() {
+                    eggHint.style.display = eggHint.style.display === 'none' ? 'block' : 'none';
+                    eggShown = !eggShown;
+                });
+            }
+
+            // Пасхалка: пиксель
+            const eggPixel = document.getElementById('eggPixel');
+            if (eggPixel) {
+                eggPixel.addEventListener('click', function() {
+                    alert('👾 Ты нашёл секретный пиксель!\n\nПрофессор Логарифм гордится тобой!');
+                    eggPixel.style.background = 'linear-gradient(135deg, #ffea00 60%, #00ff00 100%)';
+                    eggPixel.style.boxShadow = '0 0 32px #ffea00, 0 0 32px #00ff00 inset';
+                });
+            }
+
+            // Клавиатурная пасхалка: набери "logarifm"
+            let eggSeq = '';
+            document.addEventListener('keydown', function(e) {
+                eggSeq += e.key.toLowerCase();
+                if (eggSeq.length > 8) eggSeq = eggSeq.slice(-8);
+                if (eggSeq === 'logarifm') {
+                    eggHint.style.display = 'block';
+                    eggHint.innerHTML = '🔑 Супер-пасхалка! Ты ввёл секретное слово: <b>logarifm</b>';
+                }
+            });
         });
     </script>
 </body>
