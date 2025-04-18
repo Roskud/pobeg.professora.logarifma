@@ -29,43 +29,36 @@
             <p style="text-align: center; max-width: 800px; margin: 0 auto 2rem;">Если у вас есть вопросы, предложения или вы столкнулись с проблемой, пожалуйста, свяжитесь с нами. Наша команда поддержки ответит вам в течение 24 часов.</p>
             
             <div class="support-container">
-                <div class="contact-form">
-                    <form id="contactForm">
-                        <div class="form-group">
-                            <label for="name">Ваше имя:</label>
-                            <input type="text" id="name" name="name" required>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="email">Ваш email (необязательно):</label>
-                            <input type="email" id="email" name="email">
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="subject">Тема сообщения:</label>
-                            <select id="subject" name="subject" required>
-                                <option value="" disabled selected>Выберите тему</option>
-                                <option value="technical">Техническая проблема</option>
-                                <option value="question">Вопрос по квестам</option>
-                                <option value="suggestion">Предложение по улучшению</option>
-                                <option value="other">Другое</option>
-                            </select>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="message">Сообщение:</label>
-                            <textarea id="message" name="message" required></textarea>
-                        </div>
-                        
-                        <button type="submit" class="submit-btn">
-                            Отправить <i class="fas fa-paper-plane"></i>
-                        </button>
-                    </form>
-                    
-                    <div class="success-message" id="successMessage">
-                        Ваше сообщение готово! Пожалуйста, отправьте его через ваш почтовый клиент.
+                <form class="contact-form" action="https://formspree.io/f/mrbpwdjn" method="POST" id="contactForm" autocomplete="off">
+                    <div class="form-group">
+                        <label for="name">Ваше имя:</label>
+                        <input type="text" id="name" name="name" required placeholder="Введите имя">
                     </div>
-                </div>
+                    <div class="form-group">
+                        <label for="email">Ваш email (необязательно):</label>
+                        <input type="email" id="email" name="email" placeholder="example@mail.com">
+                    </div>
+                    <div class="form-group">
+                        <label for="subject">Тема сообщения:</label>
+                        <select id="subject" name="subject" required>
+                            <option value="" disabled selected>Выберите тему</option>
+                            <option value="technical">Техническая проблема</option>
+                            <option value="question">Вопрос по квестам</option>
+                            <option value="suggestion">Предложение по улучшению</option>
+                            <option value="other">Другое</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="message">Сообщение:</label>
+                        <textarea id="message" name="message" required placeholder="Опишите вашу проблему или вопрос"></textarea>
+                    </div>
+                    <button type="submit" class="submit-btn">
+                        Отправить <i class="fas fa-paper-plane"></i>
+                    </button>
+                    <div class="success-message" id="successMessage" style="display:none;">
+                        Ваше сообщение отправлено!
+                    </div>
+                </form>
             </div>
             
             <div class="faq">
@@ -114,6 +107,7 @@
         </section>
     </main>
 
+    <!-- Удалён footer с соц. сетями и копирайтом
     <footer>
         <div class="social-links">
             <a href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
@@ -123,6 +117,7 @@
         </div>
         <p>© 2025 По следам Профессора Логарифма | Все права защищены</p>
     </footer>
+    -->
 
     <script>
         // Matrix effect
@@ -177,36 +172,36 @@
 
             const contactForm = document.getElementById('contactForm');
             const successMessage = document.getElementById('successMessage');
-            
+            const errorMessage = document.getElementById('errorMessage');
+
             contactForm.addEventListener('submit', function(e) {
                 e.preventDefault();
-                
-                const name = document.getElementById('name').value;
-                const email = document.getElementById('email').value || 'Anonymous';
-                const subject = document.getElementById('subject').value;
-                const message = document.getElementById('message').value;
+                successMessage.style.display = 'none';
+                errorMessage.style.display = 'none';
 
-                const emailBody = `A message by ${name} has been received. Kindly respond at your earliest convenience.\n\n` +
-                                 `${name}\n` +
-                                 `Subject:\n${subject}\n` +
-                                 `${email}\n` +
-                                 `Message:\n${message}`;
+                const formData = new FormData(contactForm);
 
-                const encodedSubject = encodeURIComponent('New Support Complaint');
-                const encodedBody = encodeURIComponent(emailBody);
-
-                const mailtoLink = `mailto:olegyaskevich228@gmail.com?subject=${encodedSubject}&body=${encodedBody}`;
-
-                window.location.href = mailtoLink;
-
-                contactForm.style.display = 'none';
-                successMessage.style.display = 'block';
-                
-                setTimeout(() => {
-                    contactForm.reset();
-                    contactForm.style.display = 'block';
-                    successMessage.style.display = 'none';
-                }, 5000);
+                fetch('sendmail.php', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(res => res.text())
+                .then(res => {
+                    if (res.trim() === "success") {
+                        contactForm.reset();
+                        contactForm.style.display = 'none';
+                        successMessage.style.display = 'block';
+                        setTimeout(() => {
+                            contactForm.style.display = 'block';
+                            successMessage.style.display = 'none';
+                        }, 5000);
+                    } else {
+                        errorMessage.style.display = 'block';
+                    }
+                })
+                .catch(() => {
+                    errorMessage.style.display = 'block';
+                });
             });
             
             const faqQuestions = document.querySelectorAll('.faq-question');
@@ -222,6 +217,13 @@
                     icon.classList.toggle('fa-chevron-up');
                 });
             });
+        });
+
+        // Кастомное сообщение об успехе для Formspree
+        document.getElementById('contactForm').addEventListener('submit', function(e) {
+            setTimeout(() => {
+                document.getElementById('successMessage').style.display = 'block';
+            }, 1000);
         });
     </script>
 </body>

@@ -23,34 +23,57 @@
         </nav>
     </header>
 
+    <!-- Всплывающая подсказка -->
+    <div id="tooltip" style="position:fixed;pointer-events:none;z-index:2000;background:#222;color:#00ff00;padding:0.5rem 1rem;border-radius:8px;box-shadow:0 0 8px #00ff00;display:none;font-size:1rem;"></div>
+
+    <!-- Случайная цитата/шутка -->
+    <div id="randomQuote" style="position:fixed;bottom:30px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,0.8);color:#00ff00;padding:1rem 2rem;border-radius:12px;box-shadow:0 0 10px #00ff00;z-index:1001;font-size:1.1rem;cursor:pointer;transition:opacity 0.5s;"></div>
+
+    <!-- Секретная зона -->
+    <div id="secretZone" style="display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.97);z-index:3000;align-items:center;justify-content:center;flex-direction:column;">
+        <h2 style="color:#00ff00;margin-bottom:1rem;">СЕКРЕТНАЯ ЗОНА</h2>
+        <p style="color:#fff;font-size:1.3rem;">Поздравляем! Ты нашёл секрет. Вот твой бонус: <span style="color:#00ff00;">🎁</span></p>
+        <button class="start-btn" onclick="document.getElementById('secretZone').style.display='none'">Выйти</button>
+    </div>
+
     <main>
         <section class="hero fade-in-up">
-            <p class="glitch">Погрузись в захватывающий мир кибер-головоломок. Каждый уровень — это вызов. Каждое решение — шаг к свободе великого ума.</p>
+            <p class="glitch" style="font-size:2rem;line-height:1.5;margin-bottom:2.5rem;">
+                🚀 Погрузись в <span style="color:#00ff00;font-weight:bold;">захватывающий</span> мир <span style="color:#00ff00;">кибер-головоломок</span>!<br>
+                Каждый уровень — это <span style="color:#00ff00;">вызов</span>.<br>
+                Каждое решение — <span style="color:#00ff00;">шаг к свободе великого ума</span>.<br>
+                <span style="font-size:1.5rem;">🧠💡🔐</span>
+            </p>
             
             <div class="terminal">
-                <input type="text" id="terminalInput" placeholder="Введите команду для взлома..." onkeypress="handleTerminal(event)">
                 <div class="terminal-output" id="terminalOutput"></div>
+                <input type="text" id="terminalInput" placeholder="🔑 Введите команду для взлома..." onkeypress="handleTerminal(event)">
             </div>
 
             <div class="quest-description fade-in-up" id="questDescription">
-                <h3>Что такое "По следам Профессора Логарифма"?</h3>
-                <p>Это не просто квест — это цифровая миссия, в которой ты — элитный хакер. Твоя цель: проникнуть в зашифрованный мир виртуальной тюрьмы и вызволить профессора Пифагора, похищенного из-за своих гениальных математических алгоритмов.</p>
+                <h3 style="font-size:1.7rem;color:#00ff00;">Что такое "По следам Профессора Логарифма"? 🤔</h3>
+                <p style="font-size:1.2rem;">Это не просто квест — это <b>цифровая миссия</b>, где ты — элитный хакер!<br>
+                Твоя цель: проникнуть в зашифрованный мир виртуальной тюрьмы и вызволить профессора Пифагора, похищенного за свои гениальные математические алгоритмы. 🧑‍💻🔓</p>
                 
-                <h3>Как всё будет:</h3>
-                <ul>
-                    <li>Взламывай цифровые замки с помощью логики и аналитики</li>
-                    <li>Расшифровывай зашифрованные сообщения</li>
-                    <li>Ищи скрытые ключи в зашифрованных кодах</li>
-                    <li>Преодолей лабиринт цифровых ловушек</li>
-                    <li>Спаси Профессора. И узнай, кто стоит за этим заговором</li>
+                <h3 style="color:#00ff00;">Как всё будет:</h3>
+                <ul style="font-size:1.1rem;">
+                    <li>🟢 Взламывай цифровые замки с помощью логики и аналитики</li>
+                    <li>🟢 Расшифровывай зашифрованные сообщения</li>
+                    <li>🟢 Ищи скрытые ключи в кодах</li>
+                    <li>🟢 Преодолей лабиринт цифровых ловушек</li>
+                    <li>🟢 Спаси Профессора и узнай, кто стоит за этим заговором</li>
                 </ul>
                 
-                <h3>Почему стоит попробовать:</h3>
-                <p>Этот квест — микс экшена и ума. Он прокачает твои навыки в логике, математике и критическом мышлении, не давая тебе заскучать ни на минуту.</p>
+                <h3 style="color:#00ff00;">Почему стоит попробовать:</h3>
+                <p style="font-size:1.1rem;">
+                    Этот квест — <b>микс экшена и ума</b>!<br>
+                    Прокачай свои навыки в логике, математике и критическом мышлении.<br>
+                    <span style="font-size:1.3rem;">✨ Не дай себе заскучать ни на минуту! ✨</span>
+                </p>
                 
                 <div class="start-btn-container">
                     <a href="quest.html"><button class="start-btn">
-                        <i class="fas fa-play"></i> Начать приключение
+                        <i class="fas fa-play"></i> 🚀 Начать приключение!
                     </button></a>
                 </div>
             </div>
@@ -66,16 +89,6 @@
         </div>
     </div>
 
-    <footer>
-        <div class="social-links">
-            <a href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
-            <a href="#" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
-            <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
-            <a href="#" aria-label="YouTube"><i class="fab fa-youtube"></i></a>
-        </div>
-        <p>© 2025 По следам Профессора Логарифма | Все права защищены</p>
-    </footer>
-
     <script>
         // Terminal handling
         function handleTerminal(event) {
@@ -90,39 +103,83 @@
                     return;
                 }
 
-                let currentOutput = output.textContent ? output.textContent + '\n' : '';
-                output.textContent = currentOutput + '> ' + command;
-
                 let response = '';
+                let animated = false;
+
                 if (command === 'hack') {
                     response = 'Инициализация взлома... [УСПЕХ] Доступ получен!';
                     description.classList.add('show');
                 } else if (command === 'help') {
-                    response = 'Доступные команды: hack, help, status, joke, matrix, dance, secret, clear';
+                    response = '🟢 <span class="cmd-anim">Доступные команды:</span><br>' +
+                        '— <b>hack</b> — начать взлом<br>' +
+                        '— <b>help</b> — список команд<br>' +
+                        '— <b>status</b> — статус системы<br>' +
+                        '— <b>joke</b> — случайная шутка<br>' +
+                        '— <b>matrix</b> — войти в матрицу<br>' +
+                        '— <b>dance</b> — станцевать<br>' +
+                        '— <b>secret</b> — получить секрет<br>' +
+                        '— <b>clear</b> — очистить терминал';
+                    animated = true;
                 } else if (command === 'status') {
-                    response = 'Система: ОНЛАЙН | Уровень доступа: ОГРАНИЧЕННЫЙ';
+                    response = '<span class="cmd-status">Система: <b>🟢 ОНЛАЙН</b></span> | Уровень доступа: <span class="cmd-status">ОГРАНИЧЕННЫЙ 🔒</span>';
+                    animated = true;
                 } else if (command === 'joke') {
-                    response = 'Почему хакер не ходит на свидания? Потому что он всегда "взламывает" систему!';
+                    response = '<span class="cmd-joke">Почему хакер не ходит на свидания? Потому что он всегда "взламывает" систему! 😂</span>';
+                    animated = true;
                 } else if (command === 'matrix') {
-                    response = 'Ты в Матрице, Нео... Следуй за белым кроликом!';
+                    response = '<span class="cmd-matrix">Ты в Матрице, Нео... <span style="color:#0ff;">Следуй за белым кроликом 🐇</span></span>';
+                    animated = true;
                 } else if (command === 'dance') {
-                    response = '💃 Система танцует! 0101 1010 0101 💃';
+                    response = '<span class="cmd-dance">💃 Система танцует! 0101 1010 0101 💃</span>';
+                    animated = true;
                 } else if (command === 'secret') {
-                    response = 'Секретный код: LOG42. Не говори никому!';
+                    response = '<span class="cmd-secret">Секретный код: <b>LOG42</b>. Не говори никому! 🤫</span>';
+                    animated = true;
                 } else if (command === 'clear') {
-                    response = 'Система очищена. Все данные сброшены.';
-                    output.textContent = '';
+                    output.innerHTML = '';
                     description.classList.remove('show');
                     input.value = '';
                     return;
                 } else {
-                    response = 'Неизвестная команда. Введите "help", чтобы увидеть все команды.';
+                    response = '<span class="cmd-unknown">Неизвестная команда. Введите <b>help</b>, чтобы увидеть все команды.</span>';
+                    animated = true;
                 }
 
-                output.textContent = output.textContent + '\n' + response;
+                // Новый вывод: добавляем в конец, чтобы новые команды были внизу
+                output.innerHTML += `<div class="terminal-line${animated ? ' animated' : ''}"><span class="terminal-cmd">&gt; ${command}</span><br>${response}</div>`;
                 input.value = '';
+
+                // Прокрутка вниз к последней команде
+                output.scrollTop = output.scrollHeight;
+
+                // Анимация для новых команд
+                if (animated) {
+                    setTimeout(() => {
+                        const lines = output.querySelectorAll('.terminal-line.animated');
+                        lines.forEach(line => line.classList.remove('animated'));
+                    }, 1200);
+                }
             }
         }
+
+        // Анимации для разных команд
+        const style = document.createElement('style');
+        style.innerHTML = `
+.terminal-line.animated { animation: terminalFadeIn 1s; }
+@keyframes terminalFadeIn { from { opacity:0; transform: translateY(-10px) scale(0.98);} to { opacity:1; transform: none; } }
+.cmd-anim { color: #00ffea; font-weight: bold; letter-spacing: 1px; animation: blink 1.2s infinite; }
+.cmd-status { color: #00ff00; font-weight: bold; }
+.cmd-joke { color: #ffea00; font-style: italic; animation: shake 0.5s; }
+.cmd-matrix { color: #0ff; font-weight: bold; text-shadow: 0 0 8px #0ff; animation: matrixGlow 1.2s infinite alternate; }
+.cmd-dance { color: #ff00ff; font-weight: bold; animation: danceMove 0.7s infinite alternate; }
+.cmd-secret { color: #ff00aa; font-weight: bold; letter-spacing: 1px; animation: secretPulse 1.2s infinite alternate; }
+.cmd-unknown { color: #ff3333; font-weight: bold; }
+@keyframes shake { 0% { transform: translateX(0); } 25% { transform: translateX(-2px); } 50% { transform: translateX(2px); } 75% { transform: translateX(-2px); } 100% { transform: translateX(0); } }
+@keyframes matrixGlow { from { text-shadow: 0 0 8px #0ff; } to { text-shadow: 0 0 20px #0ff; } }
+@keyframes danceMove { from { transform: rotate(-2deg) scale(1.05);} to { transform: rotate(2deg) scale(1.1);} }
+@keyframes secretPulse { from { color: #ff00aa; } to { color: #00ffea; } }
+`;
+        document.head.appendChild(style);
 
         // Matrix effect
         const canvas = document.getElementById('matrix');
@@ -207,13 +264,101 @@
             }, 200);
         });
 
-        // Sound effect for start buttons
-        document.querySelectorAll('.start-btn').forEach(btn => {
-            btn.addEventListener('click', function() {
-                const audio = new Audio('https://www.soundjay.com/buttons/sounds/button-09.mp3');
-                audio.play();
+        // --- ВСПЛЫВАЮЩИЕ ПОДСКАЗКИ ---
+        const tooltip = document.getElementById('tooltip');
+        document.querySelectorAll('.start-btn, .logo, nav a').forEach(el => {
+            el.addEventListener('mouseenter', e => {
+                let text = '';
+                if(el.classList.contains('start-btn')) text = 'Начать приключение!';
+                if(el.classList.contains('logo')) text = 'Логотип проекта';
+                if(el.tagName === 'A') text = el.textContent;
+                tooltip.textContent = text;
+                tooltip.style.display = 'block';
             });
+            el.addEventListener('mousemove', e => {
+                tooltip.style.left = (e.clientX + 15) + 'px';
+                tooltip.style.top = (e.clientY + 10) + 'px';
+            });
+            el.addEventListener('mouseleave', () => tooltip.style.display = 'none');
         });
+
+        // --- СЛУЧАЙНЫЕ ЦИТАТЫ/ШУТКИ ---
+        const quotes = [
+            'Математика — это язык Вселенной. 🌌',
+            'Лучший способ предсказать будущее — изобрести его. 🚀',
+            'Взлом невозможного — лишь вопрос времени. ⏳',
+            'Почему программисты путают Хэллоуин и Рождество? Потому что 31 OCT = 25 DEC. 🎃🎄',
+            'Секрет успеха — не бояться ошибок, а учиться на них. 💡',
+            'Всё гениальное — просто. Особенно если это логарифм. 📈',
+            'Пифагор бы гордился тобой! 👨‍🏫',
+            'Кто ищет — тот всегда найдёт (и баги тоже). 🐞'
+        ];
+        function showRandomQuote() {
+            const el = document.getElementById('randomQuote');
+            el.textContent = quotes[Math.floor(Math.random() * quotes.length)];
+            el.style.opacity = '1';
+            setTimeout(() => { el.style.opacity = '0'; }, 7000);
+        }
+        showRandomQuote();
+        document.getElementById('randomQuote').onclick = showRandomQuote;
+
+        // --- АНИМАЦИЯ ТЕКСТА (typewriter) ---
+        function typeWriter(element, text, speed=60) {
+            let i = 0;
+            element.textContent = '';
+            function typing() {
+                if(i < text.length) {
+                    element.textContent += text.charAt(i);
+                    i++;
+                    setTimeout(typing, speed);
+                }
+            }
+            typing();
+        }
+        document.addEventListener('DOMContentLoaded', () => {
+            const el = document.querySelector('.glitch');
+            if(el) typeWriter(el, el.textContent, 35);
+        });
+
+        // --- ПЛАВАЮЩИЕ ЭЛЕМЕНТЫ ---
+        setInterval(() => {
+            const float = document.createElement('div');
+            float.textContent = Math.random() > 0.5 ? 'π' : 'Σ';
+            float.style.position = 'fixed';
+            float.style.left = Math.random()*100 + 'vw';
+            float.style.top = '-40px';
+            float.style.fontSize = (Math.random()*1.5+1) + 'rem';
+            float.style.color = '#00ff00';
+            float.style.opacity = '0.7';
+            float.style.pointerEvents = 'none';
+            float.style.transition = 'top 5s linear, opacity 5s';
+            float.style.zIndex = 999;
+            document.body.appendChild(float);
+            setTimeout(() => {
+                float.style.top = '110vh';
+                float.style.opacity = '0';
+            }, 50);
+            setTimeout(() => float.remove(), 5200);
+        }, 1200);
+
+        // --- СЕКРЕТНАЯ ЗОНА ПО ПАРОЛЮ ---
+        function openSecretZone() {
+            document.getElementById('secretZone').style.display = 'flex';
+        }
+        // Добавим команду в терминал
+        const origHandleTerminal = handleTerminal;
+        window.handleTerminal = function(event) {
+            if(event.key === 'Enter') {
+                const input = document.getElementById('terminalInput');
+                if(input.value.trim().toUpperCase() === 'LOG42') {
+                    openSecretZone();
+                    input.value = '';
+                    return;
+                }
+            }
+            origHandleTerminal(event);
+        };
     </script>
 </body>
 </html>
+``` 
